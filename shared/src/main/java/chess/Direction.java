@@ -1,14 +1,14 @@
 package chess;
 
 public enum Direction {
-    UP(-1, 0),
-    DOWN(1, 0),
+    UP(1, 0),
+    DOWN(-1, 0),
     LEFT(0, -1, DOWN, UP),
     RIGHT(0, 1, UP, DOWN),
-    UP_RIGHT(-1, 1),
-    UP_LEFT(-1, -1),
-    DOWN_RIGHT(1, 1),
-    DOWN_LEFT(1, -1);
+    UP_RIGHT(1, 1),
+    UP_LEFT(1, -1),
+    DOWN_RIGHT(-1, 1),
+    DOWN_LEFT(-1, -1);
 
     public static final Direction[] CARDINAL = new Direction[]{UP, LEFT, DOWN, RIGHT};
 

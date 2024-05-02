@@ -49,18 +49,18 @@ public class ChessBoard {
      */
     public void resetBoard() {
         board = new ChessPiece[SIZE][SIZE];
-        setPiecesRange(new ChessPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.PAWN), new ChessPosition(7, 1), new ChessPosition(7, 8));
-        setPiecesRange(new ChessPiece(ChessGame.TeamColor.BLACK, ChessPiece.PieceType.PAWN), new ChessPosition(2, 1), new ChessPosition(2, 8));
-        setPieces(new ChessPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.ROOK), new ChessPosition(8, 1), new ChessPosition(8, 8));
-        setPieces(new ChessPiece(ChessGame.TeamColor.BLACK, ChessPiece.PieceType.ROOK), new ChessPosition(1, 1), new ChessPosition(1, 8));
-        setPieces(new ChessPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.KNIGHT), new ChessPosition(8, 2), new ChessPosition(8, 7));
-        setPieces(new ChessPiece(ChessGame.TeamColor.BLACK, ChessPiece.PieceType.KNIGHT), new ChessPosition(1, 2), new ChessPosition(1, 7));
-        setPieces(new ChessPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.BISHOP), new ChessPosition(8, 3), new ChessPosition(8, 6));
-        setPieces(new ChessPiece(ChessGame.TeamColor.BLACK, ChessPiece.PieceType.BISHOP), new ChessPosition(1, 3), new ChessPosition(1, 6));
-        setPieces(new ChessPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.QUEEN), new ChessPosition(8, 4));
-        setPieces(new ChessPiece(ChessGame.TeamColor.BLACK, ChessPiece.PieceType.QUEEN), new ChessPosition(1, 4));
-        setPieces(new ChessPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.KING), new ChessPosition(8, 5));
-        setPieces(new ChessPiece(ChessGame.TeamColor.BLACK, ChessPiece.PieceType.KING), new ChessPosition(1, 5));
+        setPiecesRange(new ChessPiece(ChessGame.TeamColor.BLACK, ChessPiece.PieceType.PAWN), new ChessPosition(7, 1), new ChessPosition(7, 8));
+        setPiecesRange(new ChessPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.PAWN), new ChessPosition(2, 1), new ChessPosition(2, 8));
+        setPieces(new ChessPiece(ChessGame.TeamColor.BLACK, ChessPiece.PieceType.ROOK), new ChessPosition(8, 1), new ChessPosition(8, 8));
+        setPieces(new ChessPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.ROOK), new ChessPosition(1, 1), new ChessPosition(1, 8));
+        setPieces(new ChessPiece(ChessGame.TeamColor.BLACK, ChessPiece.PieceType.KNIGHT), new ChessPosition(8, 2), new ChessPosition(8, 7));
+        setPieces(new ChessPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.KNIGHT), new ChessPosition(1, 2), new ChessPosition(1, 7));
+        setPieces(new ChessPiece(ChessGame.TeamColor.BLACK, ChessPiece.PieceType.BISHOP), new ChessPosition(8, 3), new ChessPosition(8, 6));
+        setPieces(new ChessPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.BISHOP), new ChessPosition(1, 3), new ChessPosition(1, 6));
+        setPieces(new ChessPiece(ChessGame.TeamColor.BLACK, ChessPiece.PieceType.QUEEN), new ChessPosition(8, 4));
+        setPieces(new ChessPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.QUEEN), new ChessPosition(1, 4));
+        setPieces(new ChessPiece(ChessGame.TeamColor.BLACK, ChessPiece.PieceType.KING), new ChessPosition(8, 5));
+        setPieces(new ChessPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.KING), new ChessPosition(1, 5));
     }
 
     private void setPieces(ChessPiece piece, ChessPosition... positions) {
