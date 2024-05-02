@@ -15,7 +15,9 @@ public class ChessGame {
     private ChessBoard board;
 
     public ChessGame() {
-
+        turn = TeamColor.WHITE;
+        board = new ChessBoard();
+        board.resetBoard();
     }
 
     /**
@@ -85,6 +87,9 @@ public class ChessGame {
      * @throws InvalidMoveException if move is invalid
      */
     public void makeMove(ChessMove move) throws InvalidMoveException {
+        if (board.getPiece(move.getStartPosition()) == null) {
+            throw new InvalidMoveException("No piece at starting position");
+        }
         if (turn != board.getPiece(move.getStartPosition()).getTeamColor()) {
             throw new InvalidMoveException("Tried to make a move out of turn");
         }
@@ -98,6 +103,7 @@ public class ChessGame {
         } else {
             board.addPiece(move.getEndPosition(), piece);
         }
+        turn = turn == TeamColor.WHITE ? TeamColor.BLACK : TeamColor.WHITE;
     }
 
     /**
@@ -112,7 +118,7 @@ public class ChessGame {
             if (piece.getTeamColor() != teamColor) {
                 for (ChessMove move : piece.pieceMoves(board, pos)) {
                     ChessPiece endPiece = board.getPiece(move.getEndPosition());
-                    if (endPiece.getTeamColor() == teamColor && endPiece.getPieceType() == ChessPiece.PieceType.KING) {
+                    if (endPiece != null && endPiece.getTeamColor() == teamColor && endPiece.getPieceType() == ChessPiece.PieceType.KING) {
                         return true;
                     }
                 }
