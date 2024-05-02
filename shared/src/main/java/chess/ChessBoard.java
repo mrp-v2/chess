@@ -1,5 +1,7 @@
 package chess;
 
+import java.util.Iterator;
+
 /**
  * A chessboard that can hold and rearrange chess pieces.
  * <p>
@@ -71,6 +73,77 @@ public class ChessBoard {
             for (int y = start.getRow(); y <= end.getRow(); y++) {
                 board[x][y] = piece;
             }
+        }
+    }
+
+    public Iterable<ChessPosition> getPiecePositions() {
+        class itr implements Iterator<ChessPosition>, Iterable<ChessPosition> {
+
+            private int row, column;
+
+            itr() {
+                row = 0;
+                column = 0;
+                advance();
+            }
+
+            @Override
+            public boolean hasNext() {
+                return row < SIZE && column < SIZE;
+            }
+
+            @Override
+            public ChessPosition next() {
+                ChessPosition next = new ChessPosition(row, column);
+                advance();
+                return next;
+            }
+
+            private void advance() {
+                column++;
+                if (column >= SIZE) {
+                    column = 0;
+                    row++;
+                    if (row >= SIZE) {
+                        return;
+                    }
+                }
+                while (board[column][row] == null) {
+                    column++;
+                    if (column >= SIZE) {
+                        column = 0;
+                        row++;
+                        if (row >= SIZE) {
+                            return;
+                        }
+                    }
+                }
+            }
+
+            @Override
+            public Iterator<ChessPosition> iterator() {
+                return this;
+            }
+        }
+
+        return new itr();
+    }
+
+    public ChessBoard makeClone() {
+        ChessBoard clone = new ChessBoard();
+        for (ChessPosition pos : getPiecePositions()) {
+            clone.addPiece(pos, getPiece(pos));
+        }
+        return clone;
+    }
+
+    public void makeMove(ChessMove move) {
+        ChessPiece piece = getPiece(move.getStartPosition());
+        addPiece(move.getStartPosition(), null);
+        if (move.getPromotionPiece() != null) {
+            addPiece(move.getEndPosition(), new ChessPiece(piece.getTeamColor(), move.getPromotionPiece()));
+        } else {
+            addPiece(move.getEndPosition(), piece);
         }
     }
 }
