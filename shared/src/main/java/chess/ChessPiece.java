@@ -94,29 +94,37 @@ public class ChessPiece {
      */
     private Collection<ChessMove> pawnMoves(ChessBoard board, ChessPosition myPosition) {
         Collection<ChessMove> moves = new ArrayList<>();
-        ChessPosition moveOne = myPosition.move(color.forward);
-        ChessPiece pieceOne = board.getPiece(moveOne);
         // normal forward moves
-        if (pieceOne == null) {
-            addPawnMove(myPosition, moveOne, moves);
-            if (myPosition.move(color.forward, -1).isValid() && !myPosition.move(color.forward, -2).isValid()) {
-                ChessPosition moveTwo = myPosition.move(color.forward, 2);
-                ChessPiece pieceTwo = board.getPiece(moveTwo);
-                if (pieceTwo == null) {
-                    moves.add(new ChessMove(myPosition, moveTwo));
+        ChessPosition moveOne = myPosition.move(color.forward);
+        if (moveOne.isValid()) {
+            ChessPiece pieceOne = board.getPiece(moveOne);
+            if (pieceOne == null) {
+                addPawnMove(myPosition, moveOne, moves);
+                if (myPosition.move(color.forward, -1).isValid() && !myPosition.move(color.forward, -2).isValid()) {
+                    ChessPosition moveTwo = myPosition.move(color.forward, 2);
+                    if (moveTwo.isValid()) {
+                        ChessPiece pieceTwo = board.getPiece(moveTwo);
+                        if (pieceTwo == null) {
+                            moves.add(new ChessMove(myPosition, moveTwo));
+                        }
+                    }
                 }
             }
         }
         // diagonal capture moves
         ChessPosition captureLeft = myPosition.move(color.forwardLeft);
-        ChessPiece pieceLeft = board.getPiece(captureLeft);
-        if (pieceLeft != null && pieceLeft.color != color) {
-            addPawnMove(myPosition, captureLeft, moves);
+        if (captureLeft.isValid()) {
+            ChessPiece pieceLeft = board.getPiece(captureLeft);
+            if (pieceLeft != null && pieceLeft.color != color) {
+                addPawnMove(myPosition, captureLeft, moves);
+            }
         }
         ChessPosition captureRight = myPosition.move(color.forwardRight);
-        ChessPiece pieceRight = board.getPiece(captureRight);
-        if (pieceRight != null && pieceRight.color != color) {
-            addPawnMove(myPosition, captureRight, moves);
+        if (captureRight.isValid()) {
+            ChessPiece pieceRight = board.getPiece(captureRight);
+            if (pieceRight != null && pieceRight.color != color) {
+                addPawnMove(myPosition, captureRight, moves);
+            }
         }
         return moves;
     }
