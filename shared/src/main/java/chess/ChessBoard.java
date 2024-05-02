@@ -8,13 +8,15 @@ package chess;
  */
 public class ChessBoard {
 
+    public static int SIZE = 8;
+
     /**
      * Stores pieces by column, then row. e.g. board[x][y] or board[column][row]
      */
     private ChessPiece[][] board;
 
     public ChessBoard() {
-        board = new ChessPiece[8][8];
+        board = new ChessPiece[SIZE][SIZE];
     }
 
     /**
@@ -43,7 +45,7 @@ public class ChessBoard {
      * (How the game of chess normally starts)
      */
     public void resetBoard() {
-        board = new ChessPiece[8][8];
+        board = new ChessPiece[SIZE][SIZE];
         setPiecesRange(new ChessPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.PAWN), new ChessPosition(6, 0), new ChessPosition(6, 7));
         setPiecesRange(new ChessPiece(ChessGame.TeamColor.BLACK, ChessPiece.PieceType.PAWN), new ChessPosition(1, 0), new ChessPosition(1, 7));
         setPieces(new ChessPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.ROOK), new ChessPosition(7, 0), new ChessPosition(7, 7));
