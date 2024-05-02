@@ -53,21 +53,86 @@ public class ChessPiece {
      * @return Collection of valid moves
      */
     public Collection<ChessMove> pieceMoves(ChessBoard board, ChessPosition myPosition) {
+        Collection<ChessMove> moves = new ArrayList<>();
         switch (type) {
             case PAWN:
-                return pawnMoves(board, myPosition);
+                addPawnMoves(board, myPosition, moves);
+                break;
             case ROOK:
+                addRookMoves(board, myPosition, moves);
                 break;
             case KNIGHT:
+                addKnightMoves(board, myPosition, moves);
                 break;
             case BISHOP:
+                addBishopMoves(board, myPosition, moves);
                 break;
             case QUEEN:
+                addRookMoves(board, myPosition, moves);
+                addBishopMoves(board, myPosition, moves);
                 break;
             case KING:
+                for (Direction dir : Direction.values()) {
+                    ChessPosition pos = myPosition.move(dir);
+                    if (pos.isValid()) {
+                        ChessPiece piece = board.getPiece(pos);
+                        if (piece == null || piece.color != color) {
+                            moves.add(new ChessMove(myPosition, pos));
+                        }
+                    }
+                }
                 break;
         }
-        throw new RuntimeException("Not implemented");
+        return moves;
+    }
+
+    private void addKnightMoves(ChessBoard board, ChessPosition start, Collection<ChessMove> moves) {
+        for (Direction dir : Direction.CARDINAL) {
+            ChessPosition left = start.move(dir, 2).move(dir.left());
+            if (left.isValid()) {
+                ChessPiece piece = board.getPiece(left);
+                if (piece == null || piece.color != color) {
+                    moves.add(new ChessMove(start, left));
+                }
+            }
+            ChessPosition right = start.move(dir, 2).move(dir.right());
+            if (right.isValid()) {
+                ChessPiece piece = board.getPiece(right);
+                if (piece == null || piece.color != color) {
+                    moves.add(new ChessMove(start, right));
+                }
+            }
+        }
+    }
+
+    private void addBishopMoves(ChessBoard board, ChessPosition start, Collection<ChessMove> moves) {
+        addMoves(board, start, Direction.UP_RIGHT, moves);
+        addMoves(board, start, Direction.UP_LEFT, moves);
+        addMoves(board, start, Direction.DOWN_RIGHT, moves);
+        addMoves(board, start, Direction.DOWN_LEFT, moves);
+    }
+
+    private void addRookMoves(ChessBoard board, ChessPosition start, Collection<ChessMove> moves) {
+        addMoves(board, start, Direction.UP, moves);
+        addMoves(board, start, Direction.DOWN, moves);
+        addMoves(board, start, Direction.LEFT, moves);
+        addMoves(board, start, Direction.RIGHT, moves);
+    }
+
+    private void addMoves(ChessBoard board, ChessPosition start, Direction dir, Collection<ChessMove> moves) {
+        ChessPosition pos = start.move(dir);
+        while (pos.isValid()) {
+            ChessPiece piece = board.getPiece(pos);
+            if (piece == null) {
+                moves.add(new ChessMove(start, pos));
+            } else {
+                if (piece.color != color) {
+                    moves.add(new ChessMove(start, pos));
+                }
+                break;
+            }
+            pos = pos.move(dir);
+        }
     }
 
     /**
@@ -92,8 +157,7 @@ public class ChessPiece {
     /**
      * Handles the possible moves for a pawn.
      */
-    private Collection<ChessMove> pawnMoves(ChessBoard board, ChessPosition myPosition) {
-        Collection<ChessMove> moves = new ArrayList<>();
+    private void addPawnMoves(ChessBoard board, ChessPosition myPosition, Collection<ChessMove> moves) {
         // normal forward moves
         ChessPosition moveOne = myPosition.move(color.forward);
         if (moveOne.isValid()) {
@@ -126,6 +190,5 @@ public class ChessPiece {
                 addPawnMove(myPosition, captureRight, moves);
             }
         }
-        return moves;
     }
 }
