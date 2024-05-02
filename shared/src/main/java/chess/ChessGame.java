@@ -37,8 +37,16 @@ public class ChessGame {
      * Enum identifying the 2 possible teams in a chess game
      */
     public enum TeamColor {
-        WHITE,
-        BLACK
+        WHITE(Direction.UP, Direction.UP_LEFT, Direction.UP_RIGHT),
+        BLACK(Direction.DOWN, Direction.DOWN_RIGHT, Direction.DOWN_LEFT);
+
+        public final Direction forward, forwardLeft, forwardRight;
+
+        TeamColor(Direction forward, Direction forwardLeft, Direction forwardRight) {
+            this.forward = forward;
+            this.forwardLeft = forwardLeft;
+            this.forwardRight = forwardRight;
+        }
     }
 
     /**
