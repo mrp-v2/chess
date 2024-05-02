@@ -146,13 +146,14 @@ public class ChessPiece {
     private void addPawnMove(ChessPosition start, ChessPosition end, Collection<ChessMove> moves) {
         if (!end.move(color.forward).isValid()) {
             for (PieceType type : PieceType.values()) {
-                if (type == PieceType.PAWN) {
+                if (type == PieceType.PAWN || type == PieceType.KING) {
                     continue;
                 }
                 moves.add(new ChessMove(start, end, type));
             }
+        } else {
+            moves.add(new ChessMove(start, end));
         }
-        moves.add(new ChessMove(start, end));
     }
 
     /**
