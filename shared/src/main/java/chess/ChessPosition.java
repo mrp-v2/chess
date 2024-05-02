@@ -52,4 +52,26 @@ public class ChessPosition {
     public int hashCode() {
         return Objects.hash(row, col);
     }
+
+    /**
+     * Checks if this position is within the board.
+     */
+    public boolean isValid() {
+        return row >= 0 && row < ChessBoard.SIZE && col >= 0 && col < ChessBoard.SIZE;
+    }
+
+    /**
+     * Returns a new position the specified direction and distance from this position.
+     *
+     * @param dir    The direction to move in
+     * @param spaces How far to move
+     * @return A new ChessPosition
+     */
+    public ChessPosition move(Direction dir, int spaces) {
+        return dir.apply(this, spaces);
+    }
+
+    public ChessPosition move(Direction dir) {
+        return dir.apply(this, 1);
+    }
 }
