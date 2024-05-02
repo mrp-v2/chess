@@ -57,7 +57,7 @@ public class ChessPosition {
      * Checks if this position is within the board.
      */
     public boolean isValid() {
-        return row >= 0 && row < ChessBoard.SIZE && col >= 0 && col < ChessBoard.SIZE;
+        return row > 0 && row <= ChessBoard.SIZE && col > 0 && col <= ChessBoard.SIZE;
     }
 
     /**

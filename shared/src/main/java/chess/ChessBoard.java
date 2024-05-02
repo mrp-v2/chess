@@ -1,5 +1,6 @@
 package chess;
 
+import java.util.Arrays;
 import java.util.Iterator;
 
 /**
@@ -28,7 +29,7 @@ public class ChessBoard {
      * @param piece    the piece to add
      */
     public void addPiece(ChessPosition position, ChessPiece piece) {
-        board[position.getColumn()][position.getRow()] = piece;
+        board[position.getColumn() - 1][position.getRow() - 1] = piece;
     }
 
     /**
@@ -39,7 +40,7 @@ public class ChessBoard {
      * position
      */
     public ChessPiece getPiece(ChessPosition position) {
-        return board[position.getColumn()][position.getRow()];
+        return board[position.getColumn() - 1][position.getRow() - 1];
     }
 
     /**
@@ -48,30 +49,30 @@ public class ChessBoard {
      */
     public void resetBoard() {
         board = new ChessPiece[SIZE][SIZE];
-        setPiecesRange(new ChessPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.PAWN), new ChessPosition(6, 0), new ChessPosition(6, 7));
-        setPiecesRange(new ChessPiece(ChessGame.TeamColor.BLACK, ChessPiece.PieceType.PAWN), new ChessPosition(1, 0), new ChessPosition(1, 7));
-        setPieces(new ChessPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.ROOK), new ChessPosition(7, 0), new ChessPosition(7, 7));
-        setPieces(new ChessPiece(ChessGame.TeamColor.BLACK, ChessPiece.PieceType.ROOK), new ChessPosition(0, 0), new ChessPosition(0, 7));
-        setPieces(new ChessPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.KNIGHT), new ChessPosition(7, 1), new ChessPosition(7, 6));
-        setPieces(new ChessPiece(ChessGame.TeamColor.BLACK, ChessPiece.PieceType.KNIGHT), new ChessPosition(0, 1), new ChessPosition(0, 6));
-        setPieces(new ChessPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.BISHOP), new ChessPosition(7, 2), new ChessPosition(7, 5));
-        setPieces(new ChessPiece(ChessGame.TeamColor.BLACK, ChessPiece.PieceType.BISHOP), new ChessPosition(0, 2), new ChessPosition(0, 5));
-        setPieces(new ChessPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.QUEEN), new ChessPosition(7, 3));
-        setPieces(new ChessPiece(ChessGame.TeamColor.BLACK, ChessPiece.PieceType.QUEEN), new ChessPosition(0, 3));
-        setPieces(new ChessPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.KING), new ChessPosition(7, 4));
-        setPieces(new ChessPiece(ChessGame.TeamColor.BLACK, ChessPiece.PieceType.KING), new ChessPosition(0, 4));
+        setPiecesRange(new ChessPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.PAWN), new ChessPosition(7, 1), new ChessPosition(7, 8));
+        setPiecesRange(new ChessPiece(ChessGame.TeamColor.BLACK, ChessPiece.PieceType.PAWN), new ChessPosition(2, 1), new ChessPosition(2, 8));
+        setPieces(new ChessPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.ROOK), new ChessPosition(8, 1), new ChessPosition(8, 8));
+        setPieces(new ChessPiece(ChessGame.TeamColor.BLACK, ChessPiece.PieceType.ROOK), new ChessPosition(1, 1), new ChessPosition(1, 8));
+        setPieces(new ChessPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.KNIGHT), new ChessPosition(8, 2), new ChessPosition(8, 7));
+        setPieces(new ChessPiece(ChessGame.TeamColor.BLACK, ChessPiece.PieceType.KNIGHT), new ChessPosition(1, 2), new ChessPosition(1, 7));
+        setPieces(new ChessPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.BISHOP), new ChessPosition(8, 3), new ChessPosition(8, 6));
+        setPieces(new ChessPiece(ChessGame.TeamColor.BLACK, ChessPiece.PieceType.BISHOP), new ChessPosition(1, 3), new ChessPosition(1, 6));
+        setPieces(new ChessPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.QUEEN), new ChessPosition(8, 4));
+        setPieces(new ChessPiece(ChessGame.TeamColor.BLACK, ChessPiece.PieceType.QUEEN), new ChessPosition(1, 4));
+        setPieces(new ChessPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.KING), new ChessPosition(8, 5));
+        setPieces(new ChessPiece(ChessGame.TeamColor.BLACK, ChessPiece.PieceType.KING), new ChessPosition(1, 5));
     }
 
     private void setPieces(ChessPiece piece, ChessPosition... positions) {
         for (ChessPosition position : positions) {
-            board[position.getColumn()][position.getRow()] = piece;
+            addPiece(position, piece);
         }
     }
 
     private void setPiecesRange(ChessPiece piece, ChessPosition start, ChessPosition end) {
-        for (int x = start.getColumn(); x <= end.getColumn(); x++) {
-            for (int y = start.getRow(); y <= end.getRow(); y++) {
-                board[x][y] = piece;
+        for (int col = start.getColumn(); col <= end.getColumn(); col++) {
+            for (int row = start.getRow(); row <= end.getRow(); row++) {
+                addPiece(new ChessPosition(row, col), piece);
             }
         }
     }
@@ -82,14 +83,14 @@ public class ChessBoard {
             private int row, column;
 
             itr() {
-                row = 0;
-                column = 0;
+                row = 1;
+                column = 1;
                 advance();
             }
 
             @Override
             public boolean hasNext() {
-                return row < SIZE && column < SIZE;
+                return row <= SIZE && column <= SIZE;
             }
 
             @Override
@@ -101,19 +102,19 @@ public class ChessBoard {
 
             private void advance() {
                 column++;
-                if (column >= SIZE) {
-                    column = 0;
+                if (column > SIZE) {
+                    column = 1;
                     row++;
-                    if (row >= SIZE) {
+                    if (row > SIZE) {
                         return;
                     }
                 }
-                while (board[column][row] == null) {
+                while (board[column - 1][row - 1] == null) {
                     column++;
-                    if (column >= SIZE) {
-                        column = 0;
+                    if (column > SIZE) {
+                        column = 1;
                         row++;
-                        if (row >= SIZE) {
+                        if (row > SIZE) {
                             return;
                         }
                     }
