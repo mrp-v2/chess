@@ -11,7 +11,7 @@ public interface AuthAccess {
 
     boolean validate(String authToken);
 
-    String getUser(String authToken);
+    String getUser(String authToken) throws DataAccessException;
 
     void clear();
 
@@ -50,7 +50,10 @@ public interface AuthAccess {
         }
 
         @Override
-        public String getUser(String authToken) {
+        public String getUser(String authToken) throws DataAccessException {
+            if (!authTokenUsernames.containsKey(authToken)) {
+                throw new DataAccessException("invalid authToken");
+            }
             return authTokenUsernames.get(authToken);
         }
 

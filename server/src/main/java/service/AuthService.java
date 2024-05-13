@@ -1,10 +1,8 @@
 package service;
 
-import com.google.gson.Gson;
 import dataAccess.AuthAccess;
+import dataAccess.DataAccessException;
 import model.*;
-import spark.Request;
-import spark.Response;
 
 public class AuthService {
 
@@ -35,7 +33,12 @@ public class AuthService {
     }
 
     public IServiceResponse validate(String token) {
-        String user = AuthAccess.Local.getInstance().getUser(token);
+        String user;
+        try {
+            user = AuthAccess.Local.getInstance().getUser(token);
+        } catch (DataAccessException e) {
+            return ErrorModel.UNAUTHORIZED;
+        }
         if (user == null) {
             return ErrorModel.UNAUTHORIZED;
         } else {

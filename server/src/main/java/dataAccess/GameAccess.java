@@ -17,7 +17,7 @@ public interface GameAccess {
 
     GameData getGame(int gameID);
 
-    void updateGame(int gameID, GameData gameData);
+    void updateGame(int gameID, GameData gameData) throws DataAccessException;
 
     void clear();
 
@@ -58,7 +58,10 @@ public interface GameAccess {
         }
 
         @Override
-        public void updateGame(int gameID, GameData gameData) {
+        public void updateGame(int gameID, GameData gameData) throws DataAccessException {
+            if (!games.containsKey(gameID)) {
+                throw new DataAccessException("invalid gameID");
+            }
             games.put(gameID, gameData);
         }
 

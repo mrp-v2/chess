@@ -5,7 +5,7 @@ import model.UserData;
 import java.util.*;
 
 public interface UserAccess {
-    UserData getUser(String username, String password);
+    boolean validateUser(String username, String password);
 
     boolean createUser(UserData data);
 
@@ -29,15 +29,12 @@ public interface UserAccess {
         }
 
         @Override
-        public UserData getUser(String username, String password) {
+        public boolean validateUser(String username, String password) {
             UserData data = users.get(username);
             if (data == null) {
-                return null;
-            }
-            else if (data.password().equals(password)) {
-                return data;
+                return false;
             } else {
-                return null;
+                return data.password().equals(password);
             }
         }
 

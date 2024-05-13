@@ -2,8 +2,6 @@ package service;
 
 import dataAccess.UserAccess;
 import model.*;
-import spark.Request;
-import spark.Response;
 
 public class UserService {
 
@@ -32,8 +30,7 @@ public class UserService {
     }
 
     public IServiceResponse getUser(LoginRequest data) {
-        UserData result = UserAccess.Local.getInstance().getUser(data.username(), data.password());
-        if (result != null) {
+        if (UserAccess.Local.getInstance().validateUser(data.username(), data.password())) {
             return IResponseModel.SUCCESS;
         } else {
             return ErrorModel.UNAUTHORIZED;
