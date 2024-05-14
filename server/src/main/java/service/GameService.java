@@ -24,6 +24,9 @@ public class GameService {
     }
 
     public IServiceResponse create(GameRequest data) {
+        if (data.gameName() == null){
+            return ErrorModel.BAD_REQUEST;
+        }
         GameData result = GameAccess.Local.getInstance().createGame(data.gameName());
         return Wrapper.success(new GameResponse(result.gameID()));
     }

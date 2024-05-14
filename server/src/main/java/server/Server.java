@@ -56,11 +56,7 @@ public class Server {
                 res.status(400);
                 return new ErrorResponse("Error: bad request").toJson();
             }
-            IServiceResponse result = UserService.getInstance().register(data);
-            if (result.failure()) {
-                return result.send(res);
-            }
-            return AuthService.getInstance().createAuth(data.username()).send(res);
+            return UserService.getInstance().register(data).send(res);
         });
 
         Spark.post("/session", (req, res) -> {
@@ -70,11 +66,7 @@ public class Server {
             } catch (JsonSyntaxException e) {
                 return ErrorModel.UNAUTHORIZED.send(res);
             }
-            IServiceResponse result = UserService.getInstance().getUser(data);
-            if (result.failure()) {
-                return result.send(res);
-            }
-            return AuthService.getInstance().createAuth(data.username()).send(res);
+            return UserService.getInstance().createUserAuth(data).send(res);
         });
 
         Spark.delete("/session", (req, res) -> {

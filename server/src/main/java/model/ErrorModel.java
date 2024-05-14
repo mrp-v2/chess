@@ -2,20 +2,20 @@ package model;
 
 import spark.Response;
 
-public record ErrorModel(String message, int statusCode) implements IServiceResponse {
+public record ErrorModel(ErrorResponse data, int statusCode) implements IServiceResponse {
+
+    private ErrorModel(String message, int statusCode) {
+        this(new ErrorResponse(message), statusCode);
+    }
+
     @Override
     public String toJson() {
-        return new ErrorResponse(message).toJson();
+        return data.toJson();
     }
 
     public String send(Response res) {
         res.status(statusCode);
         return toJson();
-    }
-
-    @Override
-    public IJsonSerializable data() {
-        return null;
     }
 
     @Override

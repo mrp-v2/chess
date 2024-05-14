@@ -19,11 +19,6 @@ public class AuthService {
         AuthAccess.Local.getInstance().clear();
     }
 
-    public IServiceResponse createAuth(String username) {
-        String token = AuthAccess.Local.getInstance().createAuth(username);
-        return Wrapper.success(new AuthData(token, username));
-    }
-
     public IServiceResponse deleteAuth(String token) {
         if (!AuthAccess.Local.getInstance().invalidate(token)) {
             return ErrorModel.UNAUTHORIZED;
