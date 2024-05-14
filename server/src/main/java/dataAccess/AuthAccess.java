@@ -9,8 +9,6 @@ public interface AuthAccess {
 
     boolean invalidate(String authToken);
 
-    boolean validate(String authToken);
-
     String getUser(String authToken) throws DataAccessException;
 
     void clear();
@@ -42,11 +40,6 @@ public interface AuthAccess {
         @Override
         public boolean invalidate(String authToken) {
             return authTokenUsernames.remove(authToken) != null;
-        }
-
-        @Override
-        public boolean validate(String authToken) {
-            return authTokenUsernames.containsKey(authToken);
         }
 
         @Override
