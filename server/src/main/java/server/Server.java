@@ -6,7 +6,7 @@ import model.*;
 import service.AuthService;
 import service.GameService;
 import service.UserService;
-import spark.*;
+import spark.Spark;
 
 public class Server {
 
@@ -20,7 +20,7 @@ public class Server {
         Spark.before((req, res) -> {
             switch (req.pathInfo()) {
                 case "/session":
-                    if (req.requestMethod().equals("post")) {
+                    if (req.requestMethod().equals("POST")) {
                         return;
                     }
                     break;
@@ -28,7 +28,7 @@ public class Server {
                 case "/user":
                     return;
                 case "/game":
-                    if (req.requestMethod().equals("put")) {
+                    if (req.requestMethod().equals("PUT")) {
                         return;
                     }
                     break;
@@ -59,12 +59,9 @@ public class Server {
             }
             IServiceResponse result = UserService.getInstance().register(data);
             if (result.failure()) {
-                res.status(result.statusCode());
-                return result.toJson();
+                return result.send(res);
             }
-            result = AuthService.getInstance().createAuth(data.username());
-            res.status(result.statusCode());
-            return result.toJson();
+            return AuthService.getInstance().createAuth(data.username()).send(res);
         });
 
         Spark.post("/session", (req, res) -> {
@@ -76,29 +73,22 @@ public class Server {
             }
             IServiceResponse result = UserService.getInstance().getUser(data);
             if (result.failure()) {
-                res.status(result.statusCode());
-                return result.toJson();
+                return result.send(res);
             }
-            result = AuthService.getInstance().createAuth(data.username());
-            res.status(result.statusCode());
-            return result.toJson();
+            return AuthService.getInstance().createAuth(data.username()).send(res);
         });
 
         Spark.delete("/session", (req, res) -> {
             String token = req.headers("authorization");
             IServiceResponse result = AuthService.getInstance().deleteAuth(token);
             if (result.failure()) {
-                res.status(result.statusCode());
-                return result.toJson();
+                return result.send(res);
             }
-            res.status(200);
-            return "";
+            return IServiceResponse.SUCCESS.send(res);
         });
 
         Spark.get("/game", (req, res) -> {
-            IServiceResponse result = GameService.getInstance().getGames();
-            res.status(result.statusCode());
-            return result.toJson();
+            return GameService.getInstance().getGames().send(res);
         });
 
         Spark.post("/game", (req, res) -> {
@@ -109,27 +99,22 @@ public class Server {
                 res.status(400);
                 return new ErrorResponse("Error: bad request").toJson();
             }
-            IServiceResponse result = GameService.getInstance().create(data);
-            res.status(result.statusCode());
-            return result.toJson();
+            return GameService.getInstance().create(data).send(res);
         });
 
         Spark.put("/game", (req, res) -> {
             String token = req.headers("authorization");
             IServiceResponse result = AuthService.getInstance().validate(token);
             if (result.failure()) {
-                return ErrorModel.UNAUTHORIZED.send(res);
+                return result.send(res);
             }
             JoinGameRequest data;
             try {
                 data = gson.fromJson(req.body(), JoinGameRequest.class);
             } catch (JsonSyntaxException e) {
-                res.status(400);
-                return new ErrorResponse("Error: bad request").toJson();
+                return ErrorModel.BAD_REQUEST.send(res);
             }
-            result = GameService.getInstance().join(data, ((UserResponse) result).username());
-            res.status(result.statusCode());
-            return result.toJson();
+            return GameService.getInstance().join(data, ((UserResponse) result.data()).username()).send(res);
         });
 
         Spark.awaitInitialization();

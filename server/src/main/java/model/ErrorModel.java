@@ -2,9 +2,7 @@ package model;
 
 import spark.Response;
 
-import javax.naming.OperationNotSupportedException;
-
-public record ErrorModel(String message, int statusCode) implements IResponseModel {
+public record ErrorModel(String message, int statusCode) implements IServiceResponse {
     @Override
     public String toJson() {
         return new ErrorResponse(message).toJson();
@@ -13,6 +11,11 @@ public record ErrorModel(String message, int statusCode) implements IResponseMod
     public String send(Response res) {
         res.status(statusCode);
         return toJson();
+    }
+
+    @Override
+    public IJsonSerializable data() {
+        return null;
     }
 
     @Override

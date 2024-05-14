@@ -1,9 +1,8 @@
 package service;
 
+import dataAccess.DataAccessException;
 import dataAccess.GameAccess;
 import model.*;
-import spark.Request;
-import spark.Response;
 
 public class GameService {
 
@@ -21,12 +20,12 @@ public class GameService {
     }
 
     public IServiceResponse getGames() {
-        return new GamesData(GameAccess.Local.getInstance().getGames());
+        return Wrapper.success(new GamesData(GameAccess.Local.getInstance().getGames()));
     }
 
     public IServiceResponse create(GameRequest data) {
         GameData result = GameAccess.Local.getInstance().createGame(data.gameName());
-        return new GameResponse(result.gameID());
+        return Wrapper.success(new GameResponse(result.gameID()));
     }
 
     public IServiceResponse join(JoinGameRequest data, String username) {
@@ -34,19 +33,23 @@ public class GameService {
         if (result == null) {
             return ErrorModel.BAD_REQUEST;
         }
-        switch (data.playerColor()) {
-            case WHITE:
-                if (result.whiteUsername() == null) {
-                    GameAccess.Local.getInstance().updateGame(result.gameID(), result.addWhiteUser(username));
-                    return IResponseModel.SUCCESS;
-                }
-                break;
-            case BLACK:
-                if (result.blackUsername() == null) {
-                    GameAccess.Local.getInstance().updateGame(result.gameID(), result.addBlackUser(username));
-                    return IResponseModel.SUCCESS;
-                }
-                break;
+        try {
+            switch (data.playerColor()) {
+                case WHITE:
+                    if (result.whiteUsername() == null) {
+                        GameAccess.Local.getInstance().updateGame(result.gameID(), result.addWhiteUser(username));
+                        return IServiceResponse.SUCCESS;
+                    }
+                    break;
+                case BLACK:
+                    if (result.blackUsername() == null) {
+                        GameAccess.Local.getInstance().updateGame(result.gameID(), result.addBlackUser(username));
+                        return IServiceResponse.SUCCESS;
+                    }
+                    break;
+            }
+        } catch (DataAccessException e) {
+            return ErrorModel.BAD_REQUEST;
         }
         return ErrorModel.ALREADY_TAKEN;
     }

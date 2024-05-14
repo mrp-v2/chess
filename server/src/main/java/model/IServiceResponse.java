@@ -2,17 +2,26 @@ package model;
 
 import spark.Response;
 
-import javax.naming.OperationNotSupportedException;
+public interface IServiceResponse extends IJsonSerializable {
 
-public interface IResponseModel extends IServiceResponse {
+    boolean failure();
+
+    int statusCode();
 
     String send(Response res);
 
-    IResponseModel SUCCESS = new IResponseModel() {
+    IJsonSerializable data();
+
+    IServiceResponse SUCCESS = new IServiceResponse() {
         @Override
         public String send(Response res) {
             res.status(statusCode());
             return "";
+        }
+
+        @Override
+        public IJsonSerializable data() {
+            return null;
         }
 
         @Override
