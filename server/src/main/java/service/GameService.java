@@ -30,7 +30,7 @@ public class GameService {
 
     public IServiceResponse join(JoinGameRequest data, String username) {
         GameData result = GameAccess.Local.getInstance().getGame(data.gameID());
-        if (result == null) {
+        if (result == null || data.playerColor() == null) {
             return ErrorModel.BAD_REQUEST;
         }
         try {

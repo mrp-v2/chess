@@ -30,7 +30,7 @@ public interface GameAccess {
 
         public Local() {
             games = new HashMap<>();
-            currentID = 0;
+            currentID = 1;
         }
 
         public static GameAccess getInstance() {
@@ -68,7 +68,7 @@ public interface GameAccess {
         @Override
         public void clear() {
             games.clear();
-            currentID = 0;
+            currentID = 1;
         }
     }
 }

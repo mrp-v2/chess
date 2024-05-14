@@ -36,8 +36,7 @@ public class Server {
             String token = req.headers("authorization");
             IServiceResponse result = AuthService.getInstance().validate(token);
             if (result.failure()) {
-                ErrorModel.UNAUTHORIZED.send(res);
-                Spark.halt();
+                Spark.halt(result.statusCode(), result.toJson());
             }
         });
 
