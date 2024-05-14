@@ -19,41 +19,48 @@ public class GameService {
         GameAccess.Local.getInstance().clear();
     }
 
-    public IServiceResponse getGames() {
-        return Wrapper.success(new GamesData(GameAccess.Local.getInstance().getGames()));
+    public ServiceResponse getGames() {
+        return Wrapper.success(new GamesResponse(GameAccess.Local.getInstance().getGames()));
     }
 
-    public IServiceResponse create(GameRequest data) {
-        if (data.gameName() == null){
+    public ServiceResponse create(GameRequest data) {
+        if (data.gameName() == null) {
             return ErrorModel.BAD_REQUEST;
         }
         GameData result = GameAccess.Local.getInstance().createGame(data.gameName());
         return Wrapper.success(new GameResponse(result.gameID()));
     }
 
-    public IServiceResponse join(JoinGameRequest data, String username) {
+    public ServiceResponse join(JoinGameRequest data, String username) {
+        // verify the game exists and the request is valid
         GameData result = GameAccess.Local.getInstance().getGame(data.gameID());
         if (result == null || data.playerColor() == null) {
             return ErrorModel.BAD_REQUEST;
         }
-        try {
-            switch (data.playerColor()) {
-                case WHITE:
-                    if (result.whiteUsername() == null) {
-                        GameAccess.Local.getInstance().updateGame(result.gameID(), result.addWhiteUser(username));
-                        return IServiceResponse.SUCCESS;
-                    }
-                    break;
-                case BLACK:
-                    if (result.blackUsername() == null) {
-                        GameAccess.Local.getInstance().updateGame(result.gameID(), result.addBlackUser(username));
-                        return IServiceResponse.SUCCESS;
-                    }
-                    break;
-            }
-        } catch (DataAccessException e) {
-            return ErrorModel.BAD_REQUEST;
+        GameData modified = null;
+        // add player to correct color
+        switch (data.playerColor()) {
+            case WHITE:
+                if (result.whiteUsername() == null) {
+                    modified = result.addWhiteUser(username);
+                }
+                break;
+            case BLACK:
+                if (result.blackUsername() == null) {
+                    modified = result.addBlackUser(username);
+                }
+                break;
         }
-        return ErrorModel.ALREADY_TAKEN;
+        // if color was taken send an error response
+        if (modified == null) {
+            return ErrorModel.ALREADY_TAKEN;
+        }
+        // try to update the game, should succeed because the gameID is checked earlier
+        try {
+            GameAccess.Local.getInstance().updateGame(result.gameID(), modified);
+            return ServiceResponse.SUCCESS;
+        } catch (DataAccessException e) {
+            throw new RuntimeException("Tried to update a game that didn't exist, but this should have already been verified.");
+        }
     }
 }

@@ -15,7 +15,7 @@ public class UserService {
         return instance;
     }
 
-    public IServiceResponse register(UserData data) {
+    public ServiceResponse register(UserData data) {
         if (data.username() == null || data.password() == null | data.email() == null) {
             return ErrorModel.BAD_REQUEST;
         }
@@ -30,7 +30,7 @@ public class UserService {
         UserAccess.Local.getInstance().clear();
     }
 
-    public IServiceResponse createUserAuth(LoginRequest data) {
+    public ServiceResponse createUserAuth(LoginRequest data) {
         if (UserAccess.Local.getInstance().validateUser(data.username(), data.password())) {
             return createAuth(data.username());
         } else {
@@ -38,8 +38,8 @@ public class UserService {
         }
     }
 
-    private IServiceResponse createAuth(String username) {
+    private ServiceResponse createAuth(String username) {
         String token = AuthAccess.Local.getInstance().createAuth(username);
-        return Wrapper.success(new AuthData(token, username));
+        return Wrapper.success(new AuthResponse(token, username));
     }
 }

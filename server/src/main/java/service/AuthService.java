@@ -19,15 +19,15 @@ public class AuthService {
         AuthAccess.Local.getInstance().clear();
     }
 
-    public IServiceResponse deleteAuth(String token) {
+    public ServiceResponse deleteAuth(String token) {
         if (!AuthAccess.Local.getInstance().invalidate(token)) {
             return ErrorModel.UNAUTHORIZED;
         } else {
-            return IServiceResponse.SUCCESS;
+            return ServiceResponse.SUCCESS;
         }
     }
 
-    public IServiceResponse validate(String token) {
+    public ServiceResponse validate(String token) {
         String user;
         try {
             user = AuthAccess.Local.getInstance().getUser(token);

@@ -1,4 +1,4 @@
 package model;
 
-public record UserResponse(String username) implements IJsonSerializable {
+public record UserResponse(String username) implements JsonSerializable {
 }

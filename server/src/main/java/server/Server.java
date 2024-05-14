@@ -17,6 +17,7 @@ public class Server {
 
         Spark.staticFiles.location("web");
 
+        // common validation of authentication for relevant endpoints
         Spark.before((req, res) -> {
             switch (req.pathInfo()) {
                 case "/session":
@@ -34,12 +35,13 @@ public class Server {
                     break;
             }
             String token = req.headers("authorization");
-            IServiceResponse result = AuthService.getInstance().validate(token);
+            ServiceResponse result = AuthService.getInstance().validate(token);
             if (result.failure()) {
                 Spark.halt(result.statusCode(), result.toJson());
             }
         });
 
+        // clear
         Spark.delete("/db", (req, res) -> {
             UserService.getInstance().clear();
             AuthService.getInstance().clear();
@@ -48,17 +50,18 @@ public class Server {
             return "";
         });
 
+        // register user
         Spark.post("/user", (req, res) -> {
             UserData data;
             try {
                 data = gson.fromJson(req.body(), UserData.class);
             } catch (JsonSyntaxException e) {
-                res.status(400);
-                return new ErrorResponse("Error: bad request").toJson();
+                return ErrorModel.BAD_REQUEST.send(res);
             }
             return UserService.getInstance().register(data).send(res);
         });
 
+        // login user
         Spark.post("/session", (req, res) -> {
             LoginRequest data;
             try {
@@ -69,33 +72,36 @@ public class Server {
             return UserService.getInstance().createUserAuth(data).send(res);
         });
 
+        // logout user
         Spark.delete("/session", (req, res) -> {
             String token = req.headers("authorization");
-            IServiceResponse result = AuthService.getInstance().deleteAuth(token);
+            ServiceResponse result = AuthService.getInstance().deleteAuth(token);
             if (result.failure()) {
                 return result.send(res);
             }
-            return IServiceResponse.SUCCESS.send(res);
+            return ServiceResponse.SUCCESS.send(res);
         });
 
+        // get games
         Spark.get("/game", (req, res) -> {
             return GameService.getInstance().getGames().send(res);
         });
 
+        // create game
         Spark.post("/game", (req, res) -> {
             GameRequest data;
             try {
                 data = gson.fromJson(req.body(), GameRequest.class);
             } catch (JsonSyntaxException e) {
-                res.status(400);
-                return new ErrorResponse("Error: bad request").toJson();
+                return ErrorModel.BAD_REQUEST.send(res);
             }
             return GameService.getInstance().create(data).send(res);
         });
 
+        // join game
         Spark.put("/game", (req, res) -> {
             String token = req.headers("authorization");
-            IServiceResponse result = AuthService.getInstance().validate(token);
+            ServiceResponse result = AuthService.getInstance().validate(token);
             if (result.failure()) {
                 return result.send(res);
             }

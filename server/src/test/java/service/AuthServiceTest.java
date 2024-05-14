@@ -9,8 +9,6 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class AuthServiceTest {
 
-    private static final UserData user1 = new UserData("user1", "password1", "email1");
-    private static final LoginRequest login1 = new LoginRequest(user1.username(), user1.password());
     private String token1, token2;
     private static final String INVALID_AUTH = "INVALID_AUTH";
 
@@ -27,11 +25,11 @@ class AuthServiceTest {
 
     @BeforeEach
     void setup() {
-        IServiceResponse res = UserService.getInstance().register(user1);
-        AuthData data = (AuthData) res.data();
+        ServiceResponse res = UserService.getInstance().register(UserServiceTest.USER_1);
+        AuthResponse data = (AuthResponse) res.data();
         token1 = data.authToken();
-        res = UserService.getInstance().createUserAuth(login1);
-        token2 = ((AuthData) res.data()).authToken();
+        res = UserService.getInstance().createUserAuth(UserServiceTest.LOGIN_1);
+        token2 = ((AuthResponse) res.data()).authToken();
     }
 
     @Test
@@ -54,7 +52,7 @@ class AuthServiceTest {
 
     @Test
     void validate() {
-        IServiceResponse res = AuthService.getInstance().validate(token1);
+        ServiceResponse res = AuthService.getInstance().validate(token1);
         assertEquals(200, res.statusCode());
         res = AuthService.getInstance().validate(token2);
         assertEquals(200, res.statusCode());

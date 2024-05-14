@@ -2,7 +2,11 @@ package model;
 
 import spark.Response;
 
-public interface IServiceResponse extends IJsonSerializable {
+/**
+ * Specifies methods for getting information related to the server HTTP response.
+ * Also specifies a method for conveniently sending the reponse.
+ */
+public interface ServiceResponse extends JsonSerializable {
 
     boolean failure();
 
@@ -10,9 +14,12 @@ public interface IServiceResponse extends IJsonSerializable {
 
     String send(Response res);
 
-    IJsonSerializable data();
+    JsonSerializable data();
 
-    IServiceResponse SUCCESS = new IServiceResponse() {
+    /**
+     * Used when an operation is successful, but has no data associated with it.
+     */
+    ServiceResponse SUCCESS = new ServiceResponse() {
         @Override
         public String send(Response res) {
             res.status(statusCode());
@@ -20,7 +27,7 @@ public interface IServiceResponse extends IJsonSerializable {
         }
 
         @Override
-        public IJsonSerializable data() {
+        public JsonSerializable data() {
             return null;
         }
 

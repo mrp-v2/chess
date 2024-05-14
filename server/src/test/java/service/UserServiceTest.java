@@ -9,8 +9,8 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class UserServiceTest {
 
-    public static final UserData user1 = new UserData("user1", "password1", "email1");
-    public static final LoginRequest login1 = new LoginRequest(user1.username(), user1.password());
+    public static final UserData USER_1 = new UserData("user1", "password1", "email1");
+    public static final LoginRequest LOGIN_1 = new LoginRequest(USER_1.username(), USER_1.password());
 
     @AfterEach
     void cleanup() {
@@ -24,7 +24,7 @@ class UserServiceTest {
 
     @Test
     void register() {
-        assertEquals(200, UserService.getInstance().register(user1).statusCode());
+        assertEquals(200, UserService.getInstance().register(USER_1).statusCode());
     }
 
     @Test
@@ -36,6 +36,6 @@ class UserServiceTest {
     void clear() {
         register();
         UserService.getInstance().clear();
-        assertEquals(401, UserService.getInstance().createUserAuth(login1).statusCode());
+        assertEquals(401, UserService.getInstance().createUserAuth(LOGIN_1).statusCode());
     }
 }

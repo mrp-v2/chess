@@ -2,7 +2,11 @@ package model;
 
 import spark.Response;
 
-public record ErrorModel(ErrorResponse data, int statusCode) implements IServiceResponse {
+/**
+ * Used to implement {@link ServiceResponse} for all erroneous responses.
+ * Provides static instances of common errors.
+ */
+public record ErrorModel(ErrorResponse data, int statusCode) implements ServiceResponse {
 
     private ErrorModel(String message, int statusCode) {
         this(new ErrorResponse(message), statusCode);
@@ -23,7 +27,7 @@ public record ErrorModel(ErrorResponse data, int statusCode) implements IService
         return true;
     }
 
-    public static ErrorModel UNAUTHORIZED = new ErrorModel("Error: unauthorized", 401);
     public static ErrorModel BAD_REQUEST = new ErrorModel("Error: bad request", 400);
+    public static ErrorModel UNAUTHORIZED = new ErrorModel("Error: unauthorized", 401);
     public static ErrorModel ALREADY_TAKEN = new ErrorModel("Error: already taken", 403);
 }

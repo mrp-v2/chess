@@ -1,4 +1,4 @@
 package model;
 
-public record ErrorResponse(String message) implements IJsonSerializable {
+public record ErrorResponse(String message) implements JsonSerializable {
 }

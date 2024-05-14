@@ -2,7 +2,10 @@ package model;
 
 import spark.Response;
 
-public record Wrapper(IJsonSerializable data, int statusCode, boolean failure) implements IServiceResponse {
+/**
+ * Provides an easy conversion from a {@link JsonSerializable} to a {@link ServiceResponse}.
+ */
+public record Wrapper(JsonSerializable data, int statusCode, boolean failure) implements ServiceResponse {
 
     @Override
     public String send(Response res) {
@@ -10,7 +13,10 @@ public record Wrapper(IJsonSerializable data, int statusCode, boolean failure) i
         return data.toJson();
     }
 
-    public static Wrapper success(IJsonSerializable data) {
+    /**
+     * Wraps a {@link JsonSerializable} into a {@link ServiceResponse} indicating success.
+     */
+    public static Wrapper success(JsonSerializable data) {
         return new Wrapper(data, 200, false);
     }
 }

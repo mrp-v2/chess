@@ -9,7 +9,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class GameServiceTest {
 
-    public static final GameRequest gameRequest1 = new GameRequest("game1");
+    public static final GameRequest GAME_REQUEST_1 = new GameRequest("game1");
     private JoinGameRequest joinRequest1;
 
     @AfterEach
@@ -32,15 +32,15 @@ class GameServiceTest {
     @Test
     void getGames() {
         create();
-        IServiceResponse res = GameService.getInstance().getGames();
+        ServiceResponse res = GameService.getInstance().getGames();
         assertEquals(200, res.statusCode());
-        GamesData data = ((GamesData) res.data());
+        GamesResponse data = ((GamesResponse) res.data());
         assertEquals(1, data.games().size());
     }
 
     @Test
     void create() {
-        IServiceResponse res = GameService.getInstance().create(gameRequest1);
+        ServiceResponse res = GameService.getInstance().create(GAME_REQUEST_1);
         assertEquals(200, res.statusCode());
         int game1ID = ((GameResponse) res.data()).gameID();
         joinRequest1 = new JoinGameRequest(ChessGame.TeamColor.WHITE, game1ID);

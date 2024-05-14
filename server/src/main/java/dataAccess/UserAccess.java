@@ -5,16 +5,28 @@ import model.UserData;
 import java.util.*;
 
 public interface UserAccess {
+    /**
+     * Verifies a users credentials.
+     */
     boolean validateUser(String username, String password);
 
     boolean createUser(UserData data);
 
+    /**
+     * Deletes all users.
+     */
     void clear();
 
+    /**
+     * Implements {@link UserAccess} using RAM.
+     */
     class Local implements UserAccess {
 
         private static UserAccess instance;
 
+        /**
+         * Returns a reference to the global {@link Local} instance.
+         */
         public static UserAccess getInstance() {
             if (instance == null) {
                 instance = new Local();
@@ -24,7 +36,7 @@ public interface UserAccess {
 
         private final Map<String, UserData> users;
 
-        public Local() {
+        private Local() {
             users = new HashMap<>();
         }
 

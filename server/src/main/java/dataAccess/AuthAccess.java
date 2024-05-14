@@ -5,18 +5,38 @@ import java.util.Map;
 import java.util.UUID;
 
 public interface AuthAccess {
+    /**
+     * Creates an authentication token for a username.
+     */
     String createAuth(String username);
 
+    /**
+     * Deletes an authentication token.
+     */
     boolean invalidate(String authToken);
 
+    /**
+     * Gets the username associated with an authentication token.
+     *
+     * @throws DataAccessException the token is invalid
+     */
     String getUser(String authToken) throws DataAccessException;
 
+    /**
+     * Deletes all authentication tokens.
+     */
     void clear();
 
+    /**
+     * Implements {@link AuthAccess} using RAM.
+     */
     class Local implements AuthAccess {
 
         private static AuthAccess instance;
 
+        /**
+         * Returns a reference to the global {@link Local} instance.
+         */
         public static AuthAccess getInstance() {
             if (instance == null) {
                 instance = new Local();
@@ -26,7 +46,7 @@ public interface AuthAccess {
 
         private final Map<String, String> authTokenUsernames;
 
-        public Local() {
+        private Local() {
             authTokenUsernames = new HashMap<>();
         }
 

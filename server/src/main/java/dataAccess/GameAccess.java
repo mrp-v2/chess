@@ -15,10 +15,21 @@ public interface GameAccess {
 
     GameData getGame(int gameID);
 
+    /**
+     * @param gameID The ID of the game to update.
+     * @param gameData The new data for the game.
+     * @throws DataAccessException - the {@code gameID} is invalid.
+     */
     void updateGame(int gameID, GameData gameData) throws DataAccessException;
 
+    /**
+     * Deletes all games.
+     */
     void clear();
 
+    /**
+     * Implements {@link GameAccess} using RAM.
+     */
     class Local implements GameAccess {
 
         private static GameAccess instance;
@@ -26,11 +37,14 @@ public interface GameAccess {
         private final Map<Integer, GameData> games;
         private int currentID;
 
-        public Local() {
+        private Local() {
             games = new HashMap<>();
             currentID = 1;
         }
 
+        /**
+         * Returns a reference to the global {@link Local} instance.
+         */
         public static GameAccess getInstance() {
             if (instance == null) {
                 instance = new Local();
