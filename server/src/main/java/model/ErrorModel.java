@@ -27,7 +27,7 @@ public record ErrorModel(ErrorResponse data, int statusCode) implements ServiceR
         return true;
     }
 
-    public static ErrorModel BAD_REQUEST = new ErrorModel("Error: bad request", 400);
-    public static ErrorModel UNAUTHORIZED = new ErrorModel("Error: unauthorized", 401);
-    public static ErrorModel ALREADY_TAKEN = new ErrorModel("Error: already taken", 403);
+    public static final ErrorModel BAD_REQUEST = new ErrorModel("Error: bad request", 400);
+    public static final ErrorModel UNAUTHORIZED = new ErrorModel("Error: unauthorized", 401);
+    public static final ErrorModel ALREADY_TAKEN = new ErrorModel("Error: already taken", 403);
 }

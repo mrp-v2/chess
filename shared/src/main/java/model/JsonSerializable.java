@@ -7,9 +7,9 @@ import com.google.gson.Gson;
  * Provides a default implementation of this behavior suitable for record classes.
  */
 public interface JsonSerializable {
-    Gson gson = new Gson();
+    Gson GSON = new Gson();
 
     default String toJson() {
-        return gson.toJson(this);
+        return GSON.toJson(this);
     }
 }

@@ -11,7 +11,7 @@ import java.util.Iterator;
  */
 public class ChessBoard {
 
-    public static int SIZE = 8;
+    public static final int SIZE = 8;
 
     /**
      * Stores pieces by column, then row. e.g. board[x][y] or board[column][row]
@@ -78,11 +78,11 @@ public class ChessBoard {
     }
 
     public Iterable<ChessPosition> getPiecePositions() {
-        class itr implements Iterator<ChessPosition>, Iterable<ChessPosition> {
+        class Itr implements Iterator<ChessPosition>, Iterable<ChessPosition> {
 
             private int row, column;
 
-            itr() {
+            Itr() {
                 row = 1;
                 column = 1;
                 advance();
@@ -127,7 +127,7 @@ public class ChessBoard {
             }
         }
 
-        return new itr();
+        return new Itr();
     }
 
     public ChessBoard makeClone() {

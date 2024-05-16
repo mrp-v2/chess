@@ -6,116 +6,119 @@ import model.*;
 import service.AuthService;
 import service.GameService;
 import service.UserService;
+import spark.Request;
+import spark.Response;
 import spark.Spark;
 
 public class Server {
 
+    private static final Gson GSON = new Gson();
+
     public int run(int desiredPort) {
         Spark.port(desiredPort);
 
-        Gson gson = new Gson();
-
         Spark.staticFiles.location("web");
 
-        // common validation of authentication for relevant endpoints
-        Spark.before((req, res) -> {
-            switch (req.pathInfo()) {
-                case "/session":
-                    if (req.requestMethod().equals("POST")) {
-                        return;
-                    }
-                    break;
-                case "/db":
-                case "/user":
-                    return;
-                case "/game":
-                    if (req.requestMethod().equals("PUT")) {
-                        return;
-                    }
-                    break;
-            }
-            String token = req.headers("authorization");
-            ServiceResponse result = AuthService.getInstance().validate(token);
-            if (result.failure()) {
-                Spark.halt(result.statusCode(), result.toJson());
-            }
-        });
-
-        // clear
-        Spark.delete("/db", (req, res) -> {
-            UserService.getInstance().clear();
-            AuthService.getInstance().clear();
-            GameService.getInstance().clear();
-            res.status(200);
-            return "";
-        });
-
-        // register user
-        Spark.post("/user", (req, res) -> {
-            UserData data;
-            try {
-                data = gson.fromJson(req.body(), UserData.class);
-            } catch (JsonSyntaxException e) {
-                return ErrorModel.BAD_REQUEST.send(res);
-            }
-            return UserService.getInstance().register(data).send(res);
-        });
-
-        // login user
-        Spark.post("/session", (req, res) -> {
-            LoginRequest data;
-            try {
-                data = gson.fromJson(req.body(), LoginRequest.class);
-            } catch (JsonSyntaxException e) {
-                return ErrorModel.UNAUTHORIZED.send(res);
-            }
-            return UserService.getInstance().createUserAuth(data).send(res);
-        });
-
-        // logout user
-        Spark.delete("/session", (req, res) -> {
-            String token = req.headers("authorization");
-            ServiceResponse result = AuthService.getInstance().deleteAuth(token);
-            if (result.failure()) {
-                return result.send(res);
-            }
-            return ServiceResponse.SUCCESS.send(res);
-        });
-
-        // get games
-        Spark.get("/game", (req, res) -> {
-            return GameService.getInstance().getGames().send(res);
-        });
-
-        // create game
-        Spark.post("/game", (req, res) -> {
-            GameRequest data;
-            try {
-                data = gson.fromJson(req.body(), GameRequest.class);
-            } catch (JsonSyntaxException e) {
-                return ErrorModel.BAD_REQUEST.send(res);
-            }
-            return GameService.getInstance().create(data).send(res);
-        });
-
-        // join game
-        Spark.put("/game", (req, res) -> {
-            String token = req.headers("authorization");
-            ServiceResponse result = AuthService.getInstance().validate(token);
-            if (result.failure()) {
-                return result.send(res);
-            }
-            JoinGameRequest data;
-            try {
-                data = gson.fromJson(req.body(), JoinGameRequest.class);
-            } catch (JsonSyntaxException e) {
-                return ErrorModel.BAD_REQUEST.send(res);
-            }
-            return GameService.getInstance().join(data, ((UserResponse) result.data()).username()).send(res);
-        });
+        registerEndpoints();
 
         Spark.awaitInitialization();
         return Spark.port();
+    }
+
+    private void registerEndpoints() {
+        Spark.delete("/db", this::clear);
+        Spark.post("/user", this::register);
+        Spark.post("/session", this::login);
+        Spark.delete("/session", this::logout);
+        Spark.get("/game", this::getGames);
+        Spark.post("/game", this::createGame);
+        Spark.put("/game", this::joinGame);
+    }
+
+    private Object clear(Request req, Response res) {
+        UserService.getInstance().clear();
+        AuthService.getInstance().clear();
+        GameService.getInstance().clear();
+        res.status(200);
+        return "";
+    }
+
+    private Object register(Request req, Response res) {
+        UserData data;
+        try {
+            data = GSON.fromJson(req.body(), UserData.class);
+        } catch (JsonSyntaxException e) {
+            return ErrorModel.BAD_REQUEST.send(res);
+        }
+        return UserService.getInstance().register(data).send(res);
+    }
+
+    private Object login(Request req, Response res) {
+        LoginRequest data;
+        try {
+            data = GSON.fromJson(req.body(), LoginRequest.class);
+        } catch (JsonSyntaxException e) {
+            return ErrorModel.UNAUTHORIZED.send(res);
+        }
+        return UserService.getInstance().createUserAuth(data).send(res);
+    }
+
+    private Object logout(Request req, Response res) {
+        String token = req.headers("authorization");
+        ServiceResponse result = AuthService.getInstance().deleteAuth(token);
+        if (result.failure()) {
+            return result.send(res);
+        }
+        return ServiceResponse.SUCCESS.send(res);
+    }
+
+    private Object getGames(Request req, Response res) {
+        return authWrap(req, res, this::authenticatedGetGames);
+    }
+
+    private Object authenticatedGetGames(Request req, Response res, ServiceResponse auth) {
+        return GameService.getInstance().getGames().send(res);
+    }
+
+    private Object createGame(Request req, Response res) {
+        return authWrap(req, res, this::authenticatedCreateGame);
+    }
+
+    private Object authenticatedCreateGame(Request req, Response res, ServiceResponse auth) {
+        GameRequest data;
+        try {
+            data = GSON.fromJson(req.body(), GameRequest.class);
+        } catch (JsonSyntaxException e) {
+            return ErrorModel.BAD_REQUEST.send(res);
+        }
+        return GameService.getInstance().create(data).send(res);
+    }
+
+    private Object joinGame(Request req, Response res) {
+        return authWrap(req, res, this::authenticatedJoinGame);
+    }
+
+    private Object authenticatedJoinGame(Request req, Response res, ServiceResponse auth) {
+        JoinGameRequest data;
+        try {
+            data = GSON.fromJson(req.body(), JoinGameRequest.class);
+        } catch (JsonSyntaxException e) {
+            return ErrorModel.BAD_REQUEST.send(res);
+        }
+        return GameService.getInstance().join(data, ((UserResponse) auth.data()).username()).send(res);
+    }
+
+    /**
+     * Verifies that a request is authorized before propagating to an {@link AuthenticatedRoute}.
+     */
+    private Object authWrap(Request req, Response res, AuthenticatedRoute route) {
+        String token = req.headers("authorization");
+        ServiceResponse result = AuthService.getInstance().validate(token);
+        if (result.failure()) {
+            return result.send(res);
+        } else {
+            return route.handle(req, res, result);
+        }
     }
 
     public void stop() {
