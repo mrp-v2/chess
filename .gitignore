@@ -6,6 +6,9 @@ out/
 !**/src/main/**/out/
 !**/src/test/**/out/
 .idea/uiDesigner.xml
+.idea/dataSources/
+.idea/dataSources.xml
+.idea/dataSources.local.xml
 
 ### Mac OS ###
 .DS_Store
