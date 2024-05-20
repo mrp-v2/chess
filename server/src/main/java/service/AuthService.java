@@ -8,6 +8,8 @@ public class AuthService {
 
     private static AuthService instance;
 
+    private final AuthAccess authAccess;
+
     public static AuthService getInstance() {
         if (instance == null) {
             instance = new AuthService();
@@ -15,12 +17,16 @@ public class AuthService {
         return instance;
     }
 
+    private AuthService() {
+        authAccess = AuthAccess.Local.getInstance();
+    }
+
     public void clear() {
-        AuthAccess.Local.getInstance().clear();
+        authAccess.clear();
     }
 
     public ServiceResponse deleteAuth(String token) {
-        if (!AuthAccess.Local.getInstance().invalidate(token)) {
+        if (!authAccess.invalidate(token)) {
             return ErrorModel.UNAUTHORIZED;
         } else {
             return ServiceResponse.SUCCESS;
@@ -30,7 +36,7 @@ public class AuthService {
     public ServiceResponse validate(String token) {
         String user;
         try {
-            user = AuthAccess.Local.getInstance().getUser(token);
+            user = authAccess.getUser(token);
         } catch (DataAccessException e) {
             return ErrorModel.UNAUTHORIZED;
         }
