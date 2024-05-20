@@ -8,12 +8,12 @@ public interface AuthAccess {
     /**
      * Creates an authentication token for a username.
      */
-    String createAuth(String username);
+    String createAuth(String username) throws DataAccessException;
 
     /**
      * Deletes an authentication token.
      */
-    boolean invalidate(String authToken);
+    boolean invalidate(String authToken) throws DataAccessException;
 
     /**
      * Gets the username associated with an authentication token.
@@ -25,7 +25,11 @@ public interface AuthAccess {
     /**
      * Deletes all authentication tokens.
      */
-    void clear();
+    void clear() throws DataAccessException;
+
+    static String makeAuth() {
+        return UUID.randomUUID().toString();
+    }
 
     /**
      * Implements {@link AuthAccess} using RAM.
@@ -52,7 +56,7 @@ public interface AuthAccess {
 
         @Override
         public String createAuth(String username) {
-            String token = UUID.randomUUID().toString();
+            String token = AuthAccess.makeAuth();
             authTokenUsernames.put(token, username);
             return token;
         }

@@ -1,6 +1,8 @@
 package service;
 
 import dataaccess.AuthAccess;
+import dataaccess.DataAccessException;
+import dataaccess.SQLAuthAccess;
 import dataaccess.UserAccess;
 import model.*;
 
@@ -20,7 +22,7 @@ public class UserService {
 
     private UserService() {
         userAccess = UserAccess.Local.getInstance();
-        authAccess = AuthAccess.Local.getInstance();
+        authAccess = SQLAuthAccess.getInstance();
     }
 
     public ServiceResponse register(UserData data) {
@@ -47,7 +49,12 @@ public class UserService {
     }
 
     private ServiceResponse createAuth(String username) {
-        String token = authAccess.createAuth(username);
+        String token;
+        try {
+            token = authAccess.createAuth(username);
+        } catch (DataAccessException e) {
+            return ErrorModel.DATABASE_ERROR;
+        }
         return Wrapper.success(new AuthResponse(token, username));
     }
 }

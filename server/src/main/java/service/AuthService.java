@@ -2,6 +2,7 @@ package service;
 
 import dataaccess.AuthAccess;
 import dataaccess.DataAccessException;
+import dataaccess.SQLAuthAccess;
 import model.*;
 
 public class AuthService {
@@ -18,18 +19,27 @@ public class AuthService {
     }
 
     private AuthService() {
-        authAccess = AuthAccess.Local.getInstance();
+        authAccess = SQLAuthAccess.getInstance();
     }
 
-    public void clear() {
-        authAccess.clear();
+    public ServiceResponse clear() {
+        try {
+            authAccess.clear();
+        } catch (DataAccessException e) {
+            return ErrorModel.DATABASE_ERROR;
+        }
+        return ServiceResponse.SUCCESS;
     }
 
     public ServiceResponse deleteAuth(String token) {
-        if (!authAccess.invalidate(token)) {
-            return ErrorModel.UNAUTHORIZED;
-        } else {
-            return ServiceResponse.SUCCESS;
+        try {
+            if (!authAccess.invalidate(token)) {
+                return ErrorModel.UNAUTHORIZED;
+            } else {
+                return ServiceResponse.SUCCESS;
+            }
+        } catch (DataAccessException e) {
+            return ErrorModel.DATABASE_ERROR;
         }
     }
 
