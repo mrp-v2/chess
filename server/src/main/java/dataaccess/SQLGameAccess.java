@@ -34,24 +34,23 @@ public class SQLGameAccess extends SQLAccess implements GameAccess {
 
     @Override
     public Collection<GameData> getGames() throws DataAccessException {
-        return query("SELECT * FROM game", statement -> {
+        Collection<GameData> data = new ArrayList<>();
+        query("SELECT * FROM game", statement -> {
         }, result -> {
-            Collection<GameData> data = new ArrayList<>();
             do {
                 data.add(this.resultToData(result));
             } while (result.next());
             return data;
         });
+        return data;
     }
 
     @Override
     public int createGame(String name, ChessGame game) throws DataAccessException {
-        update("INSERT INTO game (name, game) VALUES (?, ?)", statement -> {
+        return update("INSERT INTO game (name, game) VALUES (?, ?)", statement -> {
             statement.setString(1, name);
             statement.setString(2, game.toJson());
-        });
-        return query("SELECT `AUTO_INCREMENT` FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA='chess' AND TABLE_NAME='game'",
-                result -> result.getInt(1) - 1);
+        }, result -> result.getInt(1));
     }
 
     @Override

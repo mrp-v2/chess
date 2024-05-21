@@ -37,15 +37,14 @@ public class Server {
 
     private Object clear(Request req, Response res) {
         ServiceResponse result = UserService.getInstance().clear();
-        if (result.failure()){
+        if (result.failure()) {
             return result.send(res);
         }
         result = AuthService.getInstance().clear();
-        if (result.failure()){
+        if (result.failure()) {
             return result.send(res);
         }
-        GameService.getInstance().clear();
-        return ServiceResponse.SUCCESS;
+        return GameService.getInstance().clear().send(res);
     }
 
     private Object register(Request req, Response res) {

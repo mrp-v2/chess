@@ -31,18 +31,14 @@ public class SQLAccess {
         }
     }
 
-    protected <T> T query(String statement, ResultTransformer<T> resultTransformer) throws DataAccessException {
-        return query(statement, ps -> {
-        }, resultTransformer);
-    }
-
-    protected <T> T query(String statement, PreparedStatementTransformer statementTransformer, ResultTransformer<T> resultTransformer) throws DataAccessException {
+    protected <T> T update(String statement, PreparedStatementTransformer transformer, ResultTransformer<T> generatedKeysTransformer) throws DataAccessException {
         try (Connection connection = DatabaseManager.getConnection()) {
-            try (PreparedStatement prepared = connection.prepareStatement(statement, PreparedStatement.RETURN_GENERATED_KEYS)) {
-                statementTransformer.transform(prepared);
-                try (ResultSet result = prepared.executeQuery()) {
+            try (PreparedStatement prepared = connection.prepareStatement(statement, Statement.RETURN_GENERATED_KEYS)) {
+                transformer.transform(prepared);
+                prepared.executeUpdate();
+                try (ResultSet result = prepared.getGeneratedKeys()) {
                     if (result.next()) {
-                        return resultTransformer.transform(result);
+                        return generatedKeysTransformer.transform(result);
                     } else {
                         return null;
                     }
@@ -55,11 +51,16 @@ public class SQLAccess {
         }
     }
 
-    protected <T, V> T queryWithGeneratedKeys(String statement, PreparedStatementTransformer statementTransformer, ResultTransformer<T> resultTransformer) throws DataAccessException {
+    protected <T> T query(String statement, ResultTransformer<T> resultTransformer) throws DataAccessException {
+        return query(statement, ps -> {
+        }, resultTransformer);
+    }
+
+    protected <T> T query(String statement, PreparedStatementTransformer statementTransformer, ResultTransformer<T> resultTransformer) throws DataAccessException {
         try (Connection connection = DatabaseManager.getConnection()) {
-            try (PreparedStatement prepared = connection.prepareStatement(statement, Statement.RETURN_GENERATED_KEYS)) {
+            try (PreparedStatement prepared = connection.prepareStatement(statement, PreparedStatement.RETURN_GENERATED_KEYS)) {
                 statementTransformer.transform(prepared);
-                try (ResultSet result = prepared.getGeneratedKeys()) {
+                try (ResultSet result = prepared.executeQuery()) {
                     if (result.next()) {
                         return resultTransformer.transform(result);
                     } else {
