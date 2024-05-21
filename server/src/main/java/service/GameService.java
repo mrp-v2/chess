@@ -1,7 +1,9 @@
 package service;
 
+import chess.ChessGame;
 import dataaccess.DataAccessException;
 import dataaccess.GameAccess;
+import dataaccess.SQLGameAccess;
 import model.*;
 
 public class GameService {
@@ -18,28 +20,47 @@ public class GameService {
     }
 
     private GameService() {
-        gameAccess = GameAccess.Local.getInstance();
+        gameAccess = SQLGameAccess.getInstance();
     }
 
-    public void clear() {
-        gameAccess.clear();
+    public ServiceResponse clear() {
+        try {
+            gameAccess.clear();
+        } catch (DataAccessException e) {
+            return ErrorModel.DATABASE_ERROR;
+        }
+        return ServiceResponse.SUCCESS;
     }
 
     public ServiceResponse getGames() {
-        return Wrapper.success(new GamesResponse(gameAccess.getGames()));
+        try {
+            return Wrapper.success(new GamesResponse(gameAccess.getGames()));
+        } catch (DataAccessException e) {
+            return ErrorModel.DATABASE_ERROR;
+        }
     }
 
     public ServiceResponse create(GameRequest data) {
         if (data.gameName() == null) {
             return ErrorModel.BAD_REQUEST;
         }
-        GameData result = gameAccess.createGame(data.gameName());
-        return Wrapper.success(new GameResponse(result.gameID()));
+        int result;
+        try {
+            result = gameAccess.createGame(data.gameName(), new ChessGame());
+        } catch (DataAccessException e) {
+            return ErrorModel.DATABASE_ERROR;
+        }
+        return Wrapper.success(new GameResponse(result));
     }
 
     public ServiceResponse join(JoinGameRequest data, String username) {
         // verify the game exists and the request is valid
-        GameData result = gameAccess.getGame(data.gameID());
+        GameData result;
+        try {
+            result = gameAccess.getGameData(data.gameID());
+        } catch (DataAccessException e) {
+            return ErrorModel.DATABASE_ERROR;
+        }
         if (result == null || data.playerColor() == null) {
             return ErrorModel.BAD_REQUEST;
         }
@@ -64,9 +85,9 @@ public class GameService {
         // try to update the game, should succeed because the gameID is checked earlier
         try {
             gameAccess.updateGame(result.gameID(), modified);
-            return ServiceResponse.SUCCESS;
         } catch (DataAccessException e) {
-            throw new RuntimeException("Tried to update a game that didn't exist, but this should have already been verified.");
+            return ErrorModel.DATABASE_ERROR;
         }
+        return ServiceResponse.SUCCESS;
     }
 }

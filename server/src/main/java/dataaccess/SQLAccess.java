@@ -1,9 +1,6 @@
 package dataaccess;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
 
 public class SQLAccess {
 
@@ -17,7 +14,7 @@ public class SQLAccess {
     }
 
     protected int update(String statement) throws DataAccessException {
-        return update(statement, (ps) -> {
+        return update(statement, ps -> {
         });
     }
 
@@ -34,11 +31,35 @@ public class SQLAccess {
         }
     }
 
+    protected <T> T query(String statement, ResultTransformer<T> resultTransformer) throws DataAccessException {
+        return query(statement, ps -> {
+        }, resultTransformer);
+    }
+
     protected <T> T query(String statement, PreparedStatementTransformer statementTransformer, ResultTransformer<T> resultTransformer) throws DataAccessException {
         try (Connection connection = DatabaseManager.getConnection()) {
-            try (PreparedStatement prepared = connection.prepareStatement(statement)) {
+            try (PreparedStatement prepared = connection.prepareStatement(statement, PreparedStatement.RETURN_GENERATED_KEYS)) {
                 statementTransformer.transform(prepared);
                 try (ResultSet result = prepared.executeQuery()) {
+                    if (result.next()) {
+                        return resultTransformer.transform(result);
+                    } else {
+                        return null;
+                    }
+                }
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    protected <T, V> T queryWithGeneratedKeys(String statement, PreparedStatementTransformer statementTransformer, ResultTransformer<T> resultTransformer) throws DataAccessException {
+        try (Connection connection = DatabaseManager.getConnection()) {
+            try (PreparedStatement prepared = connection.prepareStatement(statement, Statement.RETURN_GENERATED_KEYS)) {
+                statementTransformer.transform(prepared);
+                try (ResultSet result = prepared.getGeneratedKeys()) {
                     if (result.next()) {
                         return resultTransformer.transform(result);
                     } else {

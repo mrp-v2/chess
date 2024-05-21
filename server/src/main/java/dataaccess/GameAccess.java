@@ -9,23 +9,23 @@ import java.util.Map;
 
 public interface GameAccess {
 
-    Collection<GameData> getGames();
+    Collection<GameData> getGames() throws DataAccessException;
 
-    GameData createGame(String gameName);
+    int createGame(String name, ChessGame game) throws DataAccessException;
 
-    GameData getGame(int gameID);
+    GameData getGameData(int gameID) throws DataAccessException;
 
     /**
      * @param gameID The ID of the game to update.
-     * @param gameData The new data for the game.
+     * @param data   The new data for the game.
      * @throws DataAccessException - the {@code gameID} is invalid.
      */
-    void updateGame(int gameID, GameData gameData) throws DataAccessException;
+    void updateGame(int gameID, GameData data) throws DataAccessException;
 
     /**
      * Deletes all games.
      */
-    void clear();
+    void clear() throws DataAccessException;
 
     /**
      * Implements {@link GameAccess} using RAM.
@@ -58,23 +58,22 @@ public interface GameAccess {
         }
 
         @Override
-        public GameData createGame(String gameName) {
-            GameData data = new GameData(currentID, null, null, gameName, new ChessGame());
-            games.put(currentID++, data);
-            return data;
+        public int createGame(String name, ChessGame game) {
+            games.put(currentID, new GameData(currentID, null, null, name, game));
+            return currentID++;
         }
 
         @Override
-        public GameData getGame(int gameID) {
+        public GameData getGameData(int gameID) {
             return games.get(gameID);
         }
 
         @Override
-        public void updateGame(int gameID, GameData gameData) throws DataAccessException {
+        public void updateGame(int gameID, GameData data) throws DataAccessException {
             if (!games.containsKey(gameID)) {
                 throw new DataAccessException("invalid gameID");
             }
-            games.put(gameID, gameData);
+            games.put(gameID, data);
         }
 
         @Override

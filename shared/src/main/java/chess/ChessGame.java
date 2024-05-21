@@ -1,5 +1,7 @@
 package chess;
 
+import model.JsonSerializable;
+
 import java.util.ArrayList;
 import java.util.Collection;
 
@@ -9,7 +11,7 @@ import java.util.Collection;
  * Note: You can add to this class, but you may not alter
  * signature of the existing methods.
  */
-public class ChessGame {
+public class ChessGame implements JsonSerializable {
 
     private TeamColor turn;
     private ChessBoard board;

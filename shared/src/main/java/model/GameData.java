@@ -1,8 +1,10 @@
 package model;
 
 import chess.ChessGame;
+import com.google.gson.Gson;
 
-public record GameData(int gameID, String whiteUsername, String blackUsername, String gameName, ChessGame game) {
+public record GameData(int gameID, String whiteUsername, String blackUsername, String gameName,
+                       ChessGame game) {
 
     public GameData addWhiteUser(String user) {
         return new GameData(gameID, user, blackUsername, gameName, game);
