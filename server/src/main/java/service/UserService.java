@@ -1,10 +1,8 @@
 package service;
 
-import dataaccess.AuthAccess;
-import dataaccess.DataAccessException;
-import dataaccess.SQLAuthAccess;
-import dataaccess.UserAccess;
+import dataaccess.*;
 import model.*;
+import org.mindrot.jbcrypt.BCrypt;
 
 public class UserService {
 
@@ -21,7 +19,7 @@ public class UserService {
     }
 
     private UserService() {
-        userAccess = UserAccess.Local.getInstance();
+        userAccess = SQLUserAccess.getInstance();
         authAccess = SQLAuthAccess.getInstance();
     }
 
@@ -29,22 +27,39 @@ public class UserService {
         if (data.username() == null || data.password() == null | data.email() == null) {
             return ErrorModel.BAD_REQUEST;
         }
-        if (userAccess.createUser(data)) {
-            return createAuth(data.username());
-        } else {
-            return ErrorModel.ALREADY_TAKEN;
+        try {
+            if (userAccess.createUser(data.username(), BCrypt.hashpw(data.password(), BCrypt.gensalt()), data.email())) {
+                return createAuth(data.username());
+            } else {
+                return ErrorModel.ALREADY_TAKEN;
+            }
+        } catch (DataAccessException e) {
+            return ErrorModel.DATABASE_ERROR;
         }
     }
 
-    public void clear() {
-        UserAccess.Local.getInstance().clear();
+    public ServiceResponse clear() {
+        try {
+            userAccess.clear();
+        } catch (DataAccessException e) {
+            return ErrorModel.DATABASE_ERROR;
+        }
+        return ServiceResponse.SUCCESS;
     }
 
     public ServiceResponse createUserAuth(LoginRequest data) {
-        if (userAccess.validateUser(data.username(), data.password())) {
-            return createAuth(data.username());
-        } else {
-            return ErrorModel.UNAUTHORIZED;
+        try {
+            String hash = userAccess.getUserPasswordHash(data.username());
+            if (hash == null) {
+                return ErrorModel.UNAUTHORIZED;
+            }
+            if (BCrypt.checkpw(data.password(), hash)) {
+                return createAuth(data.username());
+            } else {
+                return ErrorModel.UNAUTHORIZED;
+            }
+        } catch (DataAccessException e) {
+            return ErrorModel.DATABASE_ERROR;
         }
     }
 

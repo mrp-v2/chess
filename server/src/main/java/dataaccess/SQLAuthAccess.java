@@ -12,18 +12,12 @@ public class SQLAuthAccess extends SQLAccess implements AuthAccess {
     }
 
     private SQLAuthAccess() {
-        try {
-            DatabaseManager.createDatabase();
-            update("""
-                    CREATE TABLE IF NOT EXISTS auth (
-                        `token` varchar(256) primary key NOT NULL,
-                        `username` varchar(256) NOT NULL
-                    );
-                    """
-            );
-        } catch (DataAccessException e) {
-            throw new RuntimeException(e);
-        }
+        super("""
+                CREATE TABLE IF NOT EXISTS auth (
+                    `token` varchar(256) primary key NOT NULL,
+                    `username` varchar(256) NOT NULL
+                );
+                """);
     }
 
     @Override

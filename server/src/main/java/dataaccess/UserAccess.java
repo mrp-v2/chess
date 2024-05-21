@@ -8,14 +8,14 @@ public interface UserAccess {
     /**
      * Verifies a users credentials.
      */
-    boolean validateUser(String username, String password);
+    String getUserPasswordHash(String username) throws DataAccessException;
 
-    boolean createUser(UserData data);
+    boolean createUser(String username, String password, String email) throws DataAccessException;
 
     /**
      * Deletes all users.
      */
-    void clear();
+    void clear() throws DataAccessException;
 
     /**
      * Implements {@link UserAccess} using RAM.
@@ -41,17 +41,18 @@ public interface UserAccess {
         }
 
         @Override
-        public boolean validateUser(String username, String password) {
+        public String getUserPasswordHash(String username) {
             UserData data = users.get(username);
             if (data == null) {
-                return false;
+                return null;
             } else {
-                return data.password().equals(password);
+                return data.password();
             }
         }
 
         @Override
-        public boolean createUser(UserData data) {
+        public boolean createUser(String username, String password, String email) {
+            UserData data = new UserData(username, password, email);
             if (users.containsKey(data.username())) {
                 return false;
             }

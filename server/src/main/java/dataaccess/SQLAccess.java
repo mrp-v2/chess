@@ -7,6 +7,15 @@ import java.sql.SQLException;
 
 public class SQLAccess {
 
+    protected SQLAccess(String tableCreationStatement) {
+        try {
+            DatabaseManager.createDatabase();
+            update(tableCreationStatement);
+        } catch (DataAccessException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     protected int update(String statement) throws DataAccessException {
         return update(statement, (ps) -> {
         });
@@ -32,6 +41,8 @@ public class SQLAccess {
                 try (ResultSet result = prepared.executeQuery()) {
                     if (result.next()) {
                         return resultTransformer.transform(result);
+                    } else {
+                        return null;
                     }
                 }
             } catch (SQLException e) {
@@ -40,6 +51,5 @@ public class SQLAccess {
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
-        return null;
     }
 }

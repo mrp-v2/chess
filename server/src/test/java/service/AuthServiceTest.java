@@ -34,7 +34,7 @@ class AuthServiceTest {
 
     @Test
     void clear() {
-        AuthService.getInstance().clear();
+        assertEquals(200, AuthService.getInstance().clear().statusCode());
         assertEquals(401, AuthService.getInstance().validate(token1).statusCode());
     }
 
