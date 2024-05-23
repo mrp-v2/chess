@@ -22,21 +22,20 @@ public class SQLGameAccess extends SQLAccess implements GameAccess {
 
     protected SQLGameAccess() {
         super("""
-                CREATE TABLE IF NOT EXISTS game (
-                    `id` INT PRIMARY KEY AUTO_INCREMENT NOT NULL,
-                    `usernameWhite` VARCHAR(256),
-                    `usernameBlack` VARCHAR(256),
-                    `name` VARCHAR(256) NOT NULL,
-                    `game` TEXT NOT NULL
-                );
-                """);
+              CREATE TABLE IF NOT EXISTS game (
+                  `id` INT PRIMARY KEY AUTO_INCREMENT NOT NULL,
+                  `usernameWhite` VARCHAR(256),
+                  `usernameBlack` VARCHAR(256),
+                  `name` VARCHAR(256) NOT NULL,
+                  `game` TEXT NOT NULL
+              );
+              """);
     }
 
     @Override
     public Collection<GameData> getGames() throws DataAccessException {
         Collection<GameData> data = new ArrayList<>();
-        query("SELECT * FROM game", statement -> {
-        }, result -> {
+        query("SELECT * FROM game", result -> {
             do {
                 data.add(this.resultToData(result));
             } while (result.next());
@@ -50,12 +49,16 @@ public class SQLGameAccess extends SQLAccess implements GameAccess {
         return update("INSERT INTO game (name, game) VALUES (?, ?)", statement -> {
             statement.setString(1, name);
             statement.setString(2, game.toJson());
-        }, result -> result.getInt(1));
+        }, result -> {
+            return result.getInt(1);
+        });
     }
 
     @Override
     public GameData getGameData(int gameID) throws DataAccessException {
-        return query("SELECT * FROM game WHERE id=?", statement -> statement.setInt(1, gameID), this::resultToData);
+        return query("SELECT * FROM game WHERE id=?", statement -> {
+            statement.setInt(1, gameID);
+        }, this::resultToData);
     }
 
     private GameData resultToData(ResultSet result) throws SQLException {

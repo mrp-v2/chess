@@ -13,26 +13,30 @@ public class SQLUserAccess extends SQLAccess implements UserAccess {
 
     protected SQLUserAccess() {
         super("""
-                CREATE TABLE IF NOT EXISTS user (
-                    `username` varchar(256) primary key NOT NULL,
-                    `password` varchar(256) NOT NULL,
-                    `email` varchar(256) NOT NULL
-                );
-                """);
+              CREATE TABLE IF NOT EXISTS user (
+                  `username` varchar(256) primary key NOT NULL,
+                  `password` varchar(256) NOT NULL,
+                  `email` varchar(256) NOT NULL
+              );
+              """);
     }
 
     @Override
     public String getUserPasswordHash(String username) throws DataAccessException {
-        return query("SELECT password FROM user WHERE username=?",
-                statement -> statement.setString(1, username),
-                result -> result.getString("password"));
+        return query("SELECT password FROM user WHERE username=?", statement -> {
+            statement.setString(1, username);
+        }, result -> {
+            return result.getString("password");
+        });
     }
 
     @Override
     public boolean createUser(String username, String password, String email) throws DataAccessException {
         if (query("SELECT 1 FROM user WHERE username=?", statement -> {
             statement.setString(1, username);
-        }, result -> true) != null) {
+        }, result -> {
+            return true;
+        }) != null) {
             return false;
         } else {
             return update("INSERT INTO user (username, password, email) VALUES (?, ?, ?)", statement -> {

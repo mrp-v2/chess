@@ -13,11 +13,11 @@ public class SQLAuthAccess extends SQLAccess implements AuthAccess {
 
     private SQLAuthAccess() {
         super("""
-                CREATE TABLE IF NOT EXISTS auth (
-                    `token` varchar(256) primary key NOT NULL,
-                    `username` varchar(256) NOT NULL
-                );
-                """);
+              CREATE TABLE IF NOT EXISTS auth (
+                  `token` varchar(256) primary key NOT NULL,
+                  `username` varchar(256) NOT NULL
+              );
+              """);
     }
 
     @Override
