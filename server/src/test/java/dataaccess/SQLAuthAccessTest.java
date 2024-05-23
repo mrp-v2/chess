@@ -6,7 +6,7 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class SQLAuthAccessTest {
+class SQLAuthAccessTest extends SQLAccessTest {
 
     private static final String USERNAME = "username";
     private String token;
@@ -18,41 +18,41 @@ class SQLAuthAccessTest {
 
     @Test
     void createAuth() {
-        assertDoesNotThrow(() -> {
+        noError(() -> {
             token = SQLAuthAccess.getInstance().createAuth(USERNAME);
-        }, "should not have an error with a new username");
+        });
         assertNotNull(token, "should not be null with a new username");
     }
 
     @Test
     void invalidateFails() {
-        assertDoesNotThrow(() -> {
+        noError(() -> {
             boolean success = SQLAuthAccess.getInstance().invalidate("invalid");
             assertFalse(success, "should be false with an invalid token");
-        }, "should not have an error");
+        });
     }
 
     @Test
     void invalidate() {
         createAuth();
-        assertDoesNotThrow(() -> {
+        noError(() -> {
             boolean success = SQLAuthAccess.getInstance().invalidate(token);
             assertTrue(success, "should be true with a valid token");
-        }, "should not have an error");
+        });
     }
 
     @Test
     void getUserFails() {
-        assertDoesNotThrow(() -> {
+        noError(() -> {
             String user = SQLAuthAccess.getInstance().getUser("invalid");
             assertNull(user, "should be null with an invalid token");
-        }, "should not have an error");
+        });
     }
 
     @Test
     void getUser() {
         createAuth();
-        assertDoesNotThrow(() -> {
+        noError(() -> {
             String user = SQLAuthAccess.getInstance().getUser(token);
             assertEquals(USERNAME, user, String.format("%s should be %s", user, USERNAME));
         });
@@ -62,7 +62,7 @@ class SQLAuthAccessTest {
     @BeforeEach
     @AfterEach
     void clearNoError() {
-        assertDoesNotThrow(SQLAuthAccess.getInstance()::clear, "should not have an error");
+        noError(SQLAuthAccess.getInstance()::clear);
     }
 
     @Test
@@ -70,9 +70,9 @@ class SQLAuthAccessTest {
         createAuth();
         getUser();
         clearNoError();
-        assertDoesNotThrow(() -> {
+        noError(() -> {
             String user = SQLAuthAccess.getInstance().getUser(USERNAME);
             assertNull(user, "should be null after clearing");
-        }, "should not have an error");
+        });
     }
 }
