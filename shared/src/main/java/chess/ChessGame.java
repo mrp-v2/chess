@@ -4,6 +4,7 @@ import model.JsonSerializable;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Objects;
 
 /**
  * For a class that can manage a chess game, making moves on a board
@@ -42,8 +43,7 @@ public class ChessGame implements JsonSerializable {
      * Enum identifying the 2 possible teams in a chess game
      */
     public enum TeamColor {
-        WHITE(Direction.UP, Direction.UP_LEFT, Direction.UP_RIGHT),
-        BLACK(Direction.DOWN, Direction.DOWN_RIGHT, Direction.DOWN_LEFT);
+        WHITE(Direction.UP, Direction.UP_LEFT, Direction.UP_RIGHT), BLACK(Direction.DOWN, Direction.DOWN_RIGHT, Direction.DOWN_LEFT);
 
         public final Direction forward, forwardLeft, forwardRight;
 
@@ -195,5 +195,22 @@ public class ChessGame implements JsonSerializable {
         clone.turn = turn;
         clone.board = board.makeClone();
         return clone;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        ChessGame chessGame = (ChessGame) o;
+        return turn == chessGame.turn && Objects.equals(board, chessGame.board);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(turn, board);
     }
 }
