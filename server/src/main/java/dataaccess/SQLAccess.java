@@ -31,11 +31,26 @@ public class SQLAccess {
         }
     }
 
-    protected <T> T update(String statement, PreparedStatementTransformer transformer, ResultTransformer<T> generatedKeysTransformer) throws DataAccessException {
+    /**
+     * Throws an error if more than one row is updated
+     */
+    protected void updateOne(String statement, PreparedStatementTransformer transformer) throws DataAccessException {
+        updateOne(statement, transformer, result -> {
+            return null;
+        });
+    }
+
+    /**
+     * Throws an error if more than one row is updated
+     */
+    protected <T> T updateOne(String statement, PreparedStatementTransformer transformer, ResultTransformer<T> generatedKeysTransformer) throws DataAccessException {
         try (Connection connection = DatabaseManager.getConnection()) {
             try (PreparedStatement prepared = connection.prepareStatement(statement, Statement.RETURN_GENERATED_KEYS)) {
                 transformer.transform(prepared);
-                prepared.executeUpdate();
+                int updateCount = prepared.executeUpdate();
+                if (updateCount != 1) {
+                    throw new DataAccessException(String.format("expected 1 row to change, but %d rows changed", updateCount));
+                }
                 try (ResultSet result = prepared.getGeneratedKeys()) {
                     if (result.next()) {
                         return generatedKeysTransformer.transform(result);

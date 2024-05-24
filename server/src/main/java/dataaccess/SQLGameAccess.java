@@ -46,7 +46,7 @@ public class SQLGameAccess extends SQLAccess implements GameAccess {
 
     @Override
     public int createGame(String name, ChessGame game) throws DataAccessException {
-        return update("INSERT INTO game (name, game) VALUES (?, ?)", statement -> {
+        return updateOne("INSERT INTO game (name, game) VALUES (?, ?)", statement -> {
             statement.setString(1, name);
             statement.setString(2, game.toJson());
         }, result -> {
@@ -67,7 +67,7 @@ public class SQLGameAccess extends SQLAccess implements GameAccess {
 
     @Override
     public void updateGame(int gameID, GameData data) throws DataAccessException {
-        update("UPDATE game SET usernameWhite=?, usernameBlack=?, name=?, game=? WHERE id=?", statement -> {
+        updateOne("UPDATE game SET usernameWhite=?, usernameBlack=?, name=?, game=? WHERE id=?", statement -> {
             statement.setString(1, data.whiteUsername());
             statement.setString(2, data.blackUsername());
             statement.setString(3, data.gameName());

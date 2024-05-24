@@ -23,7 +23,7 @@ public class SQLAuthAccess extends SQLAccess implements AuthAccess {
     @Override
     public String createAuth(String username) throws DataAccessException {
         String token = AuthAccess.makeAuth();
-        update("INSERT INTO auth (token, username) VALUES (?, ?)", statement -> {
+        updateOne("INSERT INTO auth (token, username) VALUES (?, ?)", statement -> {
             statement.setString(1, token);
             statement.setString(2, username);
         });
@@ -32,9 +32,14 @@ public class SQLAuthAccess extends SQLAccess implements AuthAccess {
 
     @Override
     public boolean invalidate(String authToken) throws DataAccessException {
-        return update("DELETE FROM auth WHERE token=?", statement -> {
+        int updateCount = update("DELETE FROM auth WHERE token=?", statement -> {
             statement.setString(1, authToken);
-        }) == 1;
+        });
+        if (updateCount > 1) {
+            throw new DataAccessException(String.format("Unexpected number of updates %d", 1));
+        } else {
+            return updateCount == 1;
+        }
     }
 
     @Override

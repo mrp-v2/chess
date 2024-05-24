@@ -39,11 +39,12 @@ public class SQLUserAccess extends SQLAccess implements UserAccess {
         }) != null) {
             return false;
         } else {
-            return update("INSERT INTO user (username, password, email) VALUES (?, ?, ?)", statement -> {
+            updateOne("INSERT INTO user (username, password, email) VALUES (?, ?, ?)", statement -> {
                 statement.setString(1, username);
                 statement.setString(2, password);
                 statement.setString(3, email);
-            }) == 1;
+            });
+            return true;
         }
     }
 
