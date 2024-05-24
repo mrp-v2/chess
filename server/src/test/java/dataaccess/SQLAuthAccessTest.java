@@ -68,7 +68,6 @@ class SQLAuthAccessTest extends SQLAccessTest {
     @Test
     void clear() {
         createAuth();
-        getUser();
         clearNoError();
         noError(() -> {
             String user = SQLAuthAccess.getInstance().getUser(USERNAME);
