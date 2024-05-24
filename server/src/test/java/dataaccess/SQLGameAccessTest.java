@@ -12,7 +12,7 @@ class SQLGameAccessTest extends SQLAccessTest {
 
     private static final String NAME = "game name";
     private static final ChessGame GAME = new ChessGame();
-    private int game_id;
+    private int gameId;
 
     @Test
     void getInstance() {
@@ -34,8 +34,8 @@ class SQLGameAccessTest extends SQLAccessTest {
     @Test
     void createGame() {
         noError(() -> {
-            game_id = SQLGameAccess.getInstance().createGame(NAME, GAME);
-            assertTrue(game_id > 0);
+            gameId = SQLGameAccess.getInstance().createGame(NAME, GAME);
+            assertTrue(gameId > 0);
         });
     }
 
@@ -43,7 +43,7 @@ class SQLGameAccessTest extends SQLAccessTest {
     void getGameData() {
         createGame();
         noError(() -> {
-            GameData data = SQLGameAccess.getInstance().getGameData(game_id);
+            GameData data = SQLGameAccess.getInstance().getGameData(gameId);
             assertNotNull(data);
         });
     }
@@ -51,7 +51,7 @@ class SQLGameAccessTest extends SQLAccessTest {
     @Test
     void getGameDataFails() {
         noError(() -> {
-            GameData data = SQLGameAccess.getInstance().getGameData(game_id);
+            GameData data = SQLGameAccess.getInstance().getGameData(gameId);
             assertNull(data);
         });
     }
@@ -60,9 +60,9 @@ class SQLGameAccessTest extends SQLAccessTest {
     void updateGame() {
         createGame();
         noError(() -> {
-            GameData updated = new GameData(game_id, "white", "black", "hehe", new ChessGame());
-            SQLGameAccess.getInstance().updateGame(game_id, updated);
-            GameData observed = SQLGameAccess.getInstance().getGameData(game_id);
+            GameData updated = new GameData(gameId, "white", "black", "hehe", new ChessGame());
+            SQLGameAccess.getInstance().updateGame(gameId, updated);
+            GameData observed = SQLGameAccess.getInstance().getGameData(gameId);
             assertEquals(updated, observed);
         });
     }
