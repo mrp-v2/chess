@@ -1,8 +1,11 @@
 package ui;
 
+import chess.ChessGame;
 import connection.ServerFacade;
 import connection.ServerResponse;
+import model.GameData;
 import model.GameResponse;
+import model.GamesResponse;
 
 import java.util.Arrays;
 import java.util.Scanner;
@@ -20,6 +23,8 @@ public class PostLoginUI extends UserInputHandler {
     private final String username;
     private final String authToken;
 
+    private GameData[] games;
+
     public PostLoginUI(Scanner scanner, String username, String authToken) {
         super(scanner, "logout");
         this.username = username;
@@ -28,7 +33,7 @@ public class PostLoginUI extends UserInputHandler {
 
     @Override
     protected void printHelp() {
-        System.out.println("post login help!");
+        System.out.println(HELP);
     }
 
     @Override
@@ -58,5 +63,67 @@ public class PostLoginUI extends UserInputHandler {
         if (!response.ok()) {
             printError(response);
         }
+    }
+
+    private void listGames(String[] args) {
+        if (args.length != 0) {
+            printHelp();
+            return;
+        }
+        ServerResponse<GamesResponse> response = ServerFacade.getGames(username, authToken);
+        if (!response.ok()) {
+            printError(response);
+            return;
+        }
+        games = response.data().games().toArray(new GameData[0]);
+        for (int i = 0; i < games.length; i++) {
+            System.out.printf("%d: Name=%s White=%s Black=%s", i, games[i].gameName(), games[i].whiteUsername(), games[i].blackUsername());
+        }
+    }
+
+    private void joinGame(String[] args) {
+        if (args.length != 2) {
+            printHelp();
+            return;
+        }
+        int gameIndex;
+        ChessGame.TeamColor color;
+        try {
+            gameIndex = Integer.parseInt(args[0]);
+            color = ChessGame.TeamColor.valueOf(args[1]);
+        } catch (NumberFormatException e) {
+            System.out.printf("Invalid argument '%s': should be an integer", args[0]);
+            return;
+        } catch (IllegalArgumentException e) {
+            System.out.printf("Invalid argument '%s': should be 'white' or 'black'", args[1]);
+            return;
+        }
+        if (gameIndex < 0 || gameIndex >= games.length) {
+            System.out.printf("Game index %d is out of range. Should be between 0 and %d, inclusive", gameIndex, games.length - 1);
+            return;
+        }
+        ServerResponse<?> response = ServerFacade.joinGame(username, authToken, games[gameIndex], color);
+        if (!response.ok()) {
+            printError(response);
+        }
+    }
+
+    private void observeGame(String[] args) {
+        if (args.length != 1) {
+            printHelp();
+            return;
+        }
+        int gameIndex;
+        try {
+            gameIndex = Integer.parseInt(args[0]);
+        } catch (NumberFormatException e) {
+            System.out.printf("Invalid argument '%s': should be an integer", args[0]);
+            return;
+        }
+        if (gameIndex < 0 || gameIndex >= games.length) {
+            System.out.printf("Game index %d is out of range. Should be between 0 and %d, inclusive", gameIndex, games.length - 1);
+            return;
+        }
+        ServerResponse<?> response = ServerFacade.observeGame(username, authToken, games[gameIndex]);
     }
 }

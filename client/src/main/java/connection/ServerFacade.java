@@ -1,5 +1,6 @@
 package connection;
 
+import chess.ChessGame;
 import model.*;
 
 import java.io.IOException;
@@ -57,6 +58,13 @@ public class ServerFacade {
         return null;
     }
 
+    private static <T extends JsonSerializable> ServerResponse<T> authenticatedRequest(String method, String path, String username, String authToken, Class<T> resultType) {
+        HttpURLConnection connection = getConnection(method, path);
+        connection.setDoOutput(true);
+        connection.addRequestProperty("Authorization", String.format("%s:%s", username, authToken));
+        return processResponse(connection, resultType);
+    }
+
     private static <T extends JsonSerializable> ServerResponse<T> authenticatedRequest(String method, String path, String username, String authToken, JsonSerializable requestBody, Class<T> resultType) {
         HttpURLConnection connection = getConnection(method, path);
         ServerResponse<T> result = addRequestData(connection, requestBody);
@@ -85,17 +93,44 @@ public class ServerFacade {
             throw new RuntimeException(e);
         }
 
-        T result;
-        try (InputStream response = connection.getInputStream()) {
-            InputStreamReader reader = new InputStreamReader(response);
-            result = JsonSerializable.GSON.fromJson(reader, resultType);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
+        if (resultType == null) {
+            try {
+                return new ServerResponse<>(null, connection.getResponseCode(), connection.getResponseMessage());
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        } else {
+            T result;
+            try (InputStream response = connection.getInputStream()) {
+                InputStreamReader reader = new InputStreamReader(response);
+                result = JsonSerializable.GSON.fromJson(reader, resultType);
+            } catch (IOException e) {
+                try {
+                    if (connection.getResponseCode() != 200){
+                        return new ServerResponse<>(null, connection.getResponseCode(), connection.getResponseMessage());
+                    }
+                } catch (IOException ex) {
+                    throw new RuntimeException(ex);
+                }
+                throw new RuntimeException(e);
+            }
+            try {
+                return new ServerResponse<>(result, connection.getResponseCode(), connection.getResponseMessage());
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
         }
-        try {
-            return new ServerResponse<>(result, connection.getResponseCode(), connection.getResponseMessage());
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+    }
+
+    public static ServerResponse<GamesResponse> getGames(String username, String authToken) {
+        return authenticatedRequest("GET", "game", username, authToken, GamesResponse.class);
+    }
+
+    public static ServerResponse<?> joinGame(String username, String authToken, GameData game, ChessGame.TeamColor color) {
+        return authenticatedRequest("PUT", "game", username, authToken, new JoinGameRequest(color, game.gameID()), null);
+    }
+
+    public static ServerResponse<?> observeGame(String username, String authToken, GameData game) {
+        return ServerResponse.connectionFailed(); // TODO
     }
 }
