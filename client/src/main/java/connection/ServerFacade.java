@@ -1,9 +1,6 @@
 package connection;
 
-import model.AuthResponse;
-import model.JsonSerializable;
-import model.LoginRequest;
-import model.UserData;
+import model.*;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -21,8 +18,11 @@ public class ServerFacade {
         return request("POST", "session", new LoginRequest(username, password), AuthResponse.class);
     }
 
-    // throw a bunch of runtime exceptions because these things shouldn't happen if our client code is correct
-    private static <T extends JsonSerializable> ServerResponse<T> request(String method, String path, JsonSerializable requestBody, Class<T> resultType) {
+    public static ServerResponse<GameResponse> createGame(String username, String authToken, String name) {
+        return authenticatedRequest("POST", "game", username, authToken, new CreateGameRequest(name), GameResponse.class);
+    }
+
+    private static HttpURLConnection getConnection(String method, String path) {
         URI uri;
         try {
             uri = new URI("http://localhost:8080/" + path);
@@ -41,16 +41,42 @@ public class ServerFacade {
             throw new RuntimeException(e);
         }
 
+        return connection;
+    }
+
+    private static <T extends JsonSerializable> ServerResponse<T> addRequestData(HttpURLConnection connection, JsonSerializable body) {
         connection.setDoOutput(true);
         connection.addRequestProperty("Content-Type", "application/json");
-        try (OutputStream body = connection.getOutputStream()) {
-            body.write(JsonSerializable.GSON.toJson(requestBody).getBytes());
+        try (OutputStream bodyStream = connection.getOutputStream()) {
+            bodyStream.write(JsonSerializable.GSON.toJson(body).getBytes());
         } catch (ConnectException e) {
             return ServerResponse.connectionFailed();
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+        return null;
+    }
 
+    private static <T extends JsonSerializable> ServerResponse<T> authenticatedRequest(String method, String path, String username, String authToken, JsonSerializable requestBody, Class<T> resultType) {
+        HttpURLConnection connection = getConnection(method, path);
+        ServerResponse<T> result = addRequestData(connection, requestBody);
+        if (result != null) {
+            return result;
+        }
+        connection.addRequestProperty("Authorization", String.format("%s:%s", username, authToken));
+        return processResponse(connection, resultType);
+    }
+
+    private static <T extends JsonSerializable> ServerResponse<T> request(String method, String path, JsonSerializable requestBody, Class<T> resultType) {
+        HttpURLConnection connection = getConnection(method, path);
+        ServerResponse<T> result = addRequestData(connection, requestBody);
+        if (result != null) {
+            return result;
+        }
+        return processResponse(connection, resultType);
+    }
+
+    private static <T extends JsonSerializable> ServerResponse<T> processResponse(HttpURLConnection connection, Class<T> resultType) {
         try {
             connection.connect();
         } catch (SocketTimeoutException e) {

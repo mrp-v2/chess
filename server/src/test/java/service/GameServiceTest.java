@@ -9,7 +9,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class GameServiceTest {
 
-    public static final GameRequest GAME_REQUEST_1 = new GameRequest("game1");
+    public static final CreateGameRequest GAME_REQUEST_1 = new CreateGameRequest("game1");
     private JoinGameRequest joinRequest1;
 
     @AfterEach
@@ -49,7 +49,7 @@ class GameServiceTest {
     @Test
     void failCreate() {
         create();
-        assertEquals(400, GameService.getInstance().create(new GameRequest(null)).statusCode());
+        assertEquals(400, GameService.getInstance().create(new CreateGameRequest(null)).statusCode());
     }
 
     @Test

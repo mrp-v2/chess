@@ -40,7 +40,7 @@ public class GameService {
         }
     }
 
-    public ServiceResponse create(GameRequest data) {
+    public ServiceResponse create(CreateGameRequest data) {
         if (data.gameName() == null) {
             return ErrorModel.BAD_REQUEST;
         }

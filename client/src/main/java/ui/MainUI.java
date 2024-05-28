@@ -27,8 +27,6 @@ public class MainUI extends UserInputHandler {
     @Override
     protected void handleArgs(String[] args) {
         switch (args[0]) {
-            case "quit":
-                break;
             case "login":
                 login(Arrays.copyOfRange(args, 1, args.length));
                 break;

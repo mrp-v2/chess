@@ -89,9 +89,9 @@ public class Server {
     }
 
     private Object authenticatedCreateGame(Request req, Response res, ServiceResponse auth) {
-        GameRequest data;
+        CreateGameRequest data;
         try {
-            data = GSON.fromJson(req.body(), GameRequest.class);
+            data = GSON.fromJson(req.body(), CreateGameRequest.class);
         } catch (JsonSyntaxException e) {
             return ErrorModel.BAD_REQUEST.send(res);
         }
