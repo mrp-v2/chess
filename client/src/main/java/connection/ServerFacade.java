@@ -19,8 +19,8 @@ public class ServerFacade {
         return request("POST", "session", new LoginRequest(username, password), AuthResponse.class);
     }
 
-    public static ServerResponse<GameResponse> createGame(String username, String authToken, String name) {
-        return authenticatedRequest("POST", "game", username, authToken, new CreateGameRequest(name), GameResponse.class);
+    public static ServerResponse<GameResponse> createGame(String authToken, String name) {
+        return authenticatedRequest("POST", "game", authToken, new CreateGameRequest(name), GameResponse.class);
     }
 
     private static HttpURLConnection getConnection(String method, String path) {
@@ -58,16 +58,16 @@ public class ServerFacade {
         return null;
     }
 
-    private static <T extends JsonSerializable> ServerResponse<T> authenticatedRequest(String method, String path, String username, String authToken, Class<T> resultType) {
+    private static <T extends JsonSerializable> ServerResponse<T> authenticatedRequest(String method, String path, String authToken, Class<T> resultType) {
         HttpURLConnection connection = getConnection(method, path);
         connection.setDoOutput(true);
-        connection.addRequestProperty("Authorization", String.format("%s:%s", username, authToken));
+        connection.addRequestProperty("Authorization", authToken);
         return processResponse(connection, resultType);
     }
 
-    private static <T extends JsonSerializable> ServerResponse<T> authenticatedRequest(String method, String path, String username, String authToken, JsonSerializable requestBody, Class<T> resultType) {
+    private static <T extends JsonSerializable> ServerResponse<T> authenticatedRequest(String method, String path, String authToken, JsonSerializable requestBody, Class<T> resultType) {
         HttpURLConnection connection = getConnection(method, path);
-        connection.addRequestProperty("Authorization", String.format("%s:%s", username, authToken));
+        connection.addRequestProperty("Authorization", authToken);
         ServerResponse<T> result = addRequestData(connection, requestBody);
         if (result != null) {
             return result;
@@ -122,15 +122,15 @@ public class ServerFacade {
         }
     }
 
-    public static ServerResponse<GamesResponse> getGames(String username, String authToken) {
-        return authenticatedRequest("GET", "game", username, authToken, GamesResponse.class);
+    public static ServerResponse<GamesResponse> getGames(String authToken) {
+        return authenticatedRequest("GET", "game", authToken, GamesResponse.class);
     }
 
-    public static ServerResponse<?> joinGame(String username, String authToken, GameData game, ChessGame.TeamColor color) {
-        return authenticatedRequest("PUT", "game", username, authToken, new JoinGameRequest(color, game.gameID()), null);
+    public static ServerResponse<?> joinGame(String authToken, GameData game, ChessGame.TeamColor color) {
+        return authenticatedRequest("PUT", "game", authToken, new JoinGameRequest(color, game.gameID()), null);
     }
 
-    public static ServerResponse<?> observeGame(String username, String authToken, GameData game) {
+    public static ServerResponse<?> observeGame(String authToken, GameData game) {
         return ServerResponse.connectionFailed(); // TODO
     }
 }

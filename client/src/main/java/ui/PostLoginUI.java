@@ -20,14 +20,12 @@ public class PostLoginUI extends UserInputHandler {
                                        join <game number> <WHITE|BLACK>
                                        observe <game number>""";
 
-    private final String username;
     private final String authToken;
 
     private GameData[] games;
 
-    public PostLoginUI(Scanner scanner, String username, String authToken) {
+    public PostLoginUI(Scanner scanner, String authToken) {
         super(scanner, "logout");
-        this.username = username;
         this.authToken = authToken;
     }
 
@@ -43,10 +41,13 @@ public class PostLoginUI extends UserInputHandler {
                 createGame(Arrays.copyOfRange(args, 1, args.length));
                 break;
             case "list":
+                listGames(Arrays.copyOfRange(args, 1, args.length));
                 break;
             case "join":
+                joinGame(Arrays.copyOfRange(args, 1, args.length));
                 break;
             case "observe":
+                observeGame(Arrays.copyOfRange(args, 1, args.length));
                 break;
             default:
                 printHelp();
@@ -59,7 +60,7 @@ public class PostLoginUI extends UserInputHandler {
             printHelp();
             return;
         }
-        ServerResponse<GameResponse> response = ServerFacade.createGame(args[0], username, authToken);
+        ServerResponse<GameResponse> response = ServerFacade.createGame(authToken, args[0]);
         if (!response.ok()) {
             printError(response);
         }
@@ -70,14 +71,18 @@ public class PostLoginUI extends UserInputHandler {
             printHelp();
             return;
         }
-        ServerResponse<GamesResponse> response = ServerFacade.getGames(username, authToken);
+        ServerResponse<GamesResponse> response = ServerFacade.getGames(authToken);
         if (!response.ok()) {
             printError(response);
             return;
         }
         games = response.data().games().toArray(new GameData[0]);
-        for (int i = 0; i < games.length; i++) {
-            System.out.printf("%d: Name=%s White=%s Black=%s", i, games[i].gameName(), games[i].whiteUsername(), games[i].blackUsername());
+        if (games.length == 0) {
+            System.out.println("No games");
+        } else {
+            for (int i = 0; i < games.length; i++) {
+                System.out.printf("%d: Name=%s White=%s Black=%s", i, games[i].gameName(), games[i].whiteUsername(), games[i].blackUsername());
+            }
         }
     }
 
@@ -102,7 +107,7 @@ public class PostLoginUI extends UserInputHandler {
             System.out.printf("Game index %d is out of range. Should be between 0 and %d, inclusive", gameIndex, games.length - 1);
             return;
         }
-        ServerResponse<?> response = ServerFacade.joinGame(username, authToken, games[gameIndex], color);
+        ServerResponse<?> response = ServerFacade.joinGame(authToken, games[gameIndex], color);
         if (!response.ok()) {
             printError(response);
         }
@@ -124,6 +129,6 @@ public class PostLoginUI extends UserInputHandler {
             System.out.printf("Game index %d is out of range. Should be between 0 and %d, inclusive", gameIndex, games.length - 1);
             return;
         }
-        ServerResponse<?> response = ServerFacade.observeGame(username, authToken, games[gameIndex]);
+        ServerResponse<?> response = ServerFacade.observeGame(authToken, games[gameIndex]);
     }
 }

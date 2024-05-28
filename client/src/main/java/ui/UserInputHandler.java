@@ -15,6 +15,7 @@ public abstract class UserInputHandler {
     }
 
     public void run() {
+        printHelp();
         String command;
         while (true) {
             command = scanner.nextLine();
