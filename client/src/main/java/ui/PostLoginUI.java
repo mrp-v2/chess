@@ -63,6 +63,8 @@ public class PostLoginUI extends UserInputHandler {
         ServerResponse<GameResponse> response = ServerFacade.createGame(authToken, args[0]);
         if (!response.ok()) {
             printError(response);
+        } else {
+            System.out.println("Success!");
         }
     }
 
@@ -81,7 +83,7 @@ public class PostLoginUI extends UserInputHandler {
             System.out.println("No games");
         } else {
             for (int i = 0; i < games.length; i++) {
-                System.out.printf("%d: Name=%s White=%s Black=%s", i, games[i].gameName(), games[i].whiteUsername(), games[i].blackUsername());
+                System.out.printf("%d: Name=%s White=%s Black=%s\n", i, games[i].gameName(), games[i].whiteUsername(), games[i].blackUsername());
             }
         }
     }
@@ -110,6 +112,8 @@ public class PostLoginUI extends UserInputHandler {
         ServerResponse<?> response = ServerFacade.joinGame(authToken, games[gameIndex], color);
         if (!response.ok()) {
             printError(response);
+        } else {
+            System.out.println("Success!");
         }
     }
 

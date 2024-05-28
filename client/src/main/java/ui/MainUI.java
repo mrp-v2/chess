@@ -62,6 +62,7 @@ public class MainUI extends UserInputHandler {
             PostLoginUI postLoginUI = new PostLoginUI(scanner, response.data().authToken());
             System.out.println("Success!");
             postLoginUI.run();
+            printHelp();
         } else {
             printError(response);
         }
