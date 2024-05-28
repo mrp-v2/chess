@@ -67,11 +67,11 @@ public class ServerFacade {
 
     private static <T extends JsonSerializable> ServerResponse<T> authenticatedRequest(String method, String path, String username, String authToken, JsonSerializable requestBody, Class<T> resultType) {
         HttpURLConnection connection = getConnection(method, path);
+        connection.addRequestProperty("Authorization", String.format("%s:%s", username, authToken));
         ServerResponse<T> result = addRequestData(connection, requestBody);
         if (result != null) {
             return result;
         }
-        connection.addRequestProperty("Authorization", String.format("%s:%s", username, authToken));
         return processResponse(connection, resultType);
     }
 
@@ -106,7 +106,7 @@ public class ServerFacade {
                 result = JsonSerializable.GSON.fromJson(reader, resultType);
             } catch (IOException e) {
                 try {
-                    if (connection.getResponseCode() != 200){
+                    if (connection.getResponseCode() != 200) {
                         return new ServerResponse<>(null, connection.getResponseCode(), connection.getResponseMessage());
                     }
                 } catch (IOException ex) {
