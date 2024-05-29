@@ -118,7 +118,8 @@ public class PostLoginUI extends UserInputHandler {
         if (!response.ok()) {
             printError(response);
         } else {
-            System.out.println("Success!");
+            GameplayUI gameplay = new GameplayUI(scanner, new ChessGame());
+            gameplay.run();
         }
     }
 
