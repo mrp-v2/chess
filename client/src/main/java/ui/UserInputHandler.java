@@ -18,14 +18,13 @@ public abstract class UserInputHandler {
         printHelp();
         String command;
         while (true) {
+            System.out.print("> ");
             command = scanner.nextLine();
             if (exitCommand.equals(command)) {
                 break;
             } else {
                 String[] args = command.split(" ");
-                if (args.length == 0) {
-                    printHelp();
-                } else {
+                if (args.length != 0) {
                     handleArgs(args);
                 }
             }
