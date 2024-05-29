@@ -27,6 +27,7 @@ public class PostLoginUI extends UserInputHandler {
     public PostLoginUI(Scanner scanner, String authToken) {
         super(scanner, "logout");
         this.authToken = authToken;
+        this.games = new GameData[0];
     }
 
     @Override
@@ -93,11 +94,15 @@ public class PostLoginUI extends UserInputHandler {
             printHelp();
             return;
         }
+        if (games.length == 0) {
+            System.out.println("No games to join loaded. Try listing the games or creating a new one.");
+            return;
+        }
         int gameIndex;
         ChessGame.TeamColor color;
         try {
             gameIndex = Integer.parseInt(args[0]);
-            color = ChessGame.TeamColor.valueOf(args[1]);
+            color = ChessGame.TeamColor.valueOf(args[1].toUpperCase());
         } catch (NumberFormatException e) {
             System.out.printf("Invalid argument '%s': should be an integer", args[0]);
             return;
