@@ -77,39 +77,61 @@ public class ChessBoard {
         }
     }
 
-    public Iterable<ChessPosition> getPiecePositions() {
-        class Itr implements Iterator<ChessPosition>, Iterable<ChessPosition> {
+    private abstract static class BaseItr implements Iterator<ChessPosition>, Iterable<ChessPosition> {
+        protected int row, column;
 
-            private int row, column;
+        protected BaseItr() {
+            row = 1;
+            column = 1;
+        }
 
-            Itr() {
-                row = 1;
-                column = 1;
-                advance();
-            }
+        @Override
+        public boolean hasNext() {
+            return row <= SIZE && column <= SIZE;
+        }
+
+        @Override
+        public ChessPosition next() {
+            ChessPosition next = new ChessPosition(row, column);
+            advance();
+            return next;
+        }
+
+        protected abstract void advance();
+
+        @Override
+        public Iterator<ChessPosition> iterator() {
+            return this;
+        }
+    }
+
+    public Iterable<ChessPosition> getPositions() {
+        class Itr extends BaseItr {
 
             @Override
-            public boolean hasNext() {
-                return row <= SIZE && column <= SIZE;
-            }
-
-            @Override
-            public ChessPosition next() {
-                ChessPosition next = new ChessPosition(row, column);
-                advance();
-                return next;
-            }
-
-            private void advance() {
+            protected void advance() {
                 column++;
                 if (column > SIZE) {
                     column = 1;
                     row++;
-                    if (row > SIZE) {
-                        return;
-                    }
                 }
-                while (board[column - 1][row - 1] == null) {
+            }
+        }
+
+        return new Itr();
+    }
+
+    public Iterable<ChessPosition> getPiecePositions() {
+        class Itr extends BaseItr {
+            Itr() {
+                super();
+                column = 0;
+                advance();
+            }
+
+            @Override
+            protected void advance() {
+                do {
                     column++;
                     if (column > SIZE) {
                         column = 1;
@@ -118,12 +140,7 @@ public class ChessBoard {
                             return;
                         }
                     }
-                }
-            }
-
-            @Override
-            public Iterator<ChessPosition> iterator() {
-                return this;
+                } while (board[column - 1][row - 1] == null);
             }
         }
 
@@ -150,8 +167,12 @@ public class ChessBoard {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
         ChessBoard that = (ChessBoard) o;
         return Arrays.deepEquals(board, that.board);
     }
