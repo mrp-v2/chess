@@ -15,8 +15,8 @@ public class MainUI extends UserInputHandler {
                                        login <username> <password>
                                        register <username> <password> <email>""";
 
-    public MainUI(Scanner scanner) {
-        super(scanner, "quit");
+    public MainUI(Scanner scanner, ServerFacade serverFacade) {
+        super(scanner, "quit", serverFacade);
     }
 
     @Override
@@ -44,7 +44,7 @@ public class MainUI extends UserInputHandler {
             printHelp();
             return;
         }
-        ServerResponse<AuthResponse> response = ServerFacade.login(args[0], args[1]);
+        ServerResponse<AuthResponse> response = serverFacade.login(args[0], args[1]);
         handleAuthResponse(response);
     }
 
@@ -53,13 +53,13 @@ public class MainUI extends UserInputHandler {
             printHelp();
             return;
         }
-        ServerResponse<AuthResponse> response = ServerFacade.register(args[0], args[1], args[2]);
+        ServerResponse<AuthResponse> response = serverFacade.register(args[0], args[1], args[2]);
         handleAuthResponse(response);
     }
 
     private void handleAuthResponse(ServerResponse<AuthResponse> response) {
         if (response.ok()) {
-            PostLoginUI postLoginUI = new PostLoginUI(scanner, response.data().authToken());
+            PostLoginUI postLoginUI = new PostLoginUI(scanner, response.data().authToken(), serverFacade);
             System.out.println("Success!");
             postLoginUI.run();
             printHelp();

@@ -1,5 +1,6 @@
 package ui;
 
+import connection.ServerFacade;
 import connection.ServerResponse;
 
 import java.util.Scanner;
@@ -8,10 +9,12 @@ public abstract class UserInputHandler {
 
     protected final Scanner scanner;
     private final String exitCommand;
+    protected final ServerFacade serverFacade;
 
-    protected UserInputHandler(Scanner scanner, String exitCommand) {
+    protected UserInputHandler(Scanner scanner, String exitCommand, ServerFacade serverFacade) {
         this.scanner = scanner;
         this.exitCommand = exitCommand;
+        this.serverFacade = serverFacade;
     }
 
     public void run() {

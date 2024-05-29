@@ -3,6 +3,7 @@ package ui;
 import chess.ChessGame;
 import chess.ChessPiece;
 import chess.ChessPosition;
+import connection.ServerFacade;
 
 import java.util.Scanner;
 
@@ -12,8 +13,8 @@ public class GameplayUI extends UserInputHandler {
 
     private ChessGame game;
 
-    public GameplayUI(Scanner scanner, ChessGame game) {
-        super(scanner, "exit");
+    public GameplayUI(Scanner scanner, ChessGame game, ServerFacade serverFacade) {
+        super(scanner, "exit", serverFacade);
         this.game = game;
     }
 

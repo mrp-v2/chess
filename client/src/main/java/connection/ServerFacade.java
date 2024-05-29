@@ -11,22 +11,32 @@ import java.net.*;
 
 public class ServerFacade {
 
-    public static ServerResponse<AuthResponse> register(String username, String password, String email) {
+    private final int port;
+
+    public ServerFacade() {
+        this(8080);
+    }
+
+    public ServerFacade(int port) {
+        this.port = port;
+    }
+
+    public ServerResponse<AuthResponse> register(String username, String password, String email) {
         return request("POST", "user", new UserData(username, password, email), AuthResponse.class);
     }
 
-    public static ServerResponse<AuthResponse> login(String username, String password) {
+    public ServerResponse<AuthResponse> login(String username, String password) {
         return request("POST", "session", new LoginRequest(username, password), AuthResponse.class);
     }
 
-    public static ServerResponse<GameResponse> createGame(String authToken, String name) {
+    public ServerResponse<GameResponse> createGame(String authToken, String name) {
         return authenticatedRequest("POST", "game", authToken, new CreateGameRequest(name), GameResponse.class);
     }
 
-    private static HttpURLConnection getConnection(String method, String path) {
+    private HttpURLConnection getConnection(String method, String path) {
         URI uri;
         try {
-            uri = new URI("http://localhost:8080/" + path);
+            uri = new URI(String.format("http://localhost:%d/", port) + path);
         } catch (URISyntaxException e) {
             throw new RuntimeException(e);
         }
@@ -45,7 +55,7 @@ public class ServerFacade {
         return connection;
     }
 
-    private static <T extends JsonSerializable> ServerResponse<T> addRequestData(HttpURLConnection connection, JsonSerializable body) {
+    private <T extends JsonSerializable> ServerResponse<T> addRequestData(HttpURLConnection connection, JsonSerializable body) {
         connection.setDoOutput(true);
         connection.addRequestProperty("Content-Type", "application/json");
         try (OutputStream bodyStream = connection.getOutputStream()) {
@@ -58,14 +68,14 @@ public class ServerFacade {
         return null;
     }
 
-    private static <T extends JsonSerializable> ServerResponse<T> authenticatedRequest(String method, String path, String authToken, Class<T> resultType) {
+    private <T extends JsonSerializable> ServerResponse<T> authenticatedRequest(String method, String path, String authToken, Class<T> resultType) {
         HttpURLConnection connection = getConnection(method, path);
         connection.setDoOutput(true);
         connection.addRequestProperty("Authorization", authToken);
         return processResponse(connection, resultType);
     }
 
-    private static <T extends JsonSerializable> ServerResponse<T> authenticatedRequest(String method, String path, String authToken, JsonSerializable requestBody, Class<T> resultType) {
+    private <T extends JsonSerializable> ServerResponse<T> authenticatedRequest(String method, String path, String authToken, JsonSerializable requestBody, Class<T> resultType) {
         HttpURLConnection connection = getConnection(method, path);
         connection.addRequestProperty("Authorization", authToken);
         ServerResponse<T> result = addRequestData(connection, requestBody);
@@ -75,7 +85,7 @@ public class ServerFacade {
         return processResponse(connection, resultType);
     }
 
-    private static <T extends JsonSerializable> ServerResponse<T> request(String method, String path, JsonSerializable requestBody, Class<T> resultType) {
+    private <T extends JsonSerializable> ServerResponse<T> request(String method, String path, JsonSerializable requestBody, Class<T> resultType) {
         HttpURLConnection connection = getConnection(method, path);
         ServerResponse<T> result = addRequestData(connection, requestBody);
         if (result != null) {
@@ -84,7 +94,7 @@ public class ServerFacade {
         return processResponse(connection, resultType);
     }
 
-    private static <T extends JsonSerializable> ServerResponse<T> processResponse(HttpURLConnection connection, Class<T> resultType) {
+    private <T extends JsonSerializable> ServerResponse<T> processResponse(HttpURLConnection connection, Class<T> resultType) {
         try {
             connection.connect();
         } catch (SocketTimeoutException e) {
@@ -122,15 +132,15 @@ public class ServerFacade {
         }
     }
 
-    public static ServerResponse<GamesResponse> getGames(String authToken) {
+    public ServerResponse<GamesResponse> getGames(String authToken) {
         return authenticatedRequest("GET", "game", authToken, GamesResponse.class);
     }
 
-    public static ServerResponse<?> joinGame(String authToken, GameData game, ChessGame.TeamColor color) {
+    public ServerResponse<?> joinGame(String authToken, GameData game, ChessGame.TeamColor color) {
         return authenticatedRequest("PUT", "game", authToken, new JoinGameRequest(color, game.gameID()), null);
     }
 
-    public static ServerResponse<?> observeGame(String authToken, GameData game) {
+    public ServerResponse<?> observeGame(String authToken, GameData game) {
         return ServerResponse.connectionFailed(); // TODO
     }
 }

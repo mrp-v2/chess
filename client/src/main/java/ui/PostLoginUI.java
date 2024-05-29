@@ -24,8 +24,8 @@ public class PostLoginUI extends UserInputHandler {
 
     private GameData[] games;
 
-    public PostLoginUI(Scanner scanner, String authToken) {
-        super(scanner, "logout");
+    public PostLoginUI(Scanner scanner, String authToken, ServerFacade serverFacade) {
+        super(scanner, "logout", serverFacade);
         this.authToken = authToken;
         this.games = new GameData[0];
     }
@@ -61,7 +61,7 @@ public class PostLoginUI extends UserInputHandler {
             printHelp();
             return;
         }
-        ServerResponse<GameResponse> response = ServerFacade.createGame(authToken, args[0]);
+        ServerResponse<GameResponse> response = serverFacade.createGame(authToken, args[0]);
         if (!response.ok()) {
             printError(response);
         } else {
@@ -74,7 +74,7 @@ public class PostLoginUI extends UserInputHandler {
             printHelp();
             return;
         }
-        ServerResponse<GamesResponse> response = ServerFacade.getGames(authToken);
+        ServerResponse<GamesResponse> response = serverFacade.getGames(authToken);
         if (!response.ok()) {
             printError(response);
             return;
@@ -114,11 +114,11 @@ public class PostLoginUI extends UserInputHandler {
             System.out.printf("Game index %d is out of range. Should be between 0 and %d, inclusive", gameIndex, games.length - 1);
             return;
         }
-        ServerResponse<?> response = ServerFacade.joinGame(authToken, games[gameIndex], color);
+        ServerResponse<?> response = serverFacade.joinGame(authToken, games[gameIndex], color);
         if (!response.ok()) {
             printError(response);
         } else {
-            GameplayUI gameplay = new GameplayUI(scanner, new ChessGame());
+            GameplayUI gameplay = new GameplayUI(scanner, new ChessGame(), serverFacade);
             gameplay.run();
         }
     }
@@ -139,6 +139,6 @@ public class PostLoginUI extends UserInputHandler {
             System.out.printf("Game index %d is out of range. Should be between 0 and %d, inclusive", gameIndex, games.length - 1);
             return;
         }
-        ServerResponse<?> response = ServerFacade.observeGame(authToken, games[gameIndex]);
+        ServerResponse<?> response = serverFacade.observeGame(authToken, games[gameIndex]);
     }
 }
