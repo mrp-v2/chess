@@ -89,24 +89,12 @@ public class PostLoginUI extends UserInputHandler {
             printHelp();
             return;
         }
-        if (games.length == 0) {
-            System.out.println("No games to join loaded. Try listing the games or creating a new one.");
+        if (!verifyGameCount()) {
             return;
         }
-        int gameIndex;
-        ChessGame.TeamColor color;
-        try {
-            gameIndex = Integer.parseInt(args[0]);
-            color = ChessGame.TeamColor.valueOf(args[1].toUpperCase());
-        } catch (NumberFormatException e) {
-            System.out.printf("Invalid argument '%s': should be an integer", args[0]);
-            return;
-        } catch (IllegalArgumentException e) {
-            System.out.printf("Invalid argument '%s': should be 'white' or 'black'", args[1]);
-            return;
-        }
-        if (gameIndex < 0 || gameIndex >= games.length) {
-            System.out.printf("Game index %d is out of range. Should be between 0 and %d, inclusive", gameIndex, games.length - 1);
+        int gameIndex = verifyGameIndex(args[0]);
+        ChessGame.TeamColor color = verifyTeamColor(args[1]);
+        if (gameIndex < 0 || color == null) {
             return;
         }
         ServerResponse<?> response = serverFacade.joinGame(authToken, games[gameIndex].gameID(), color);
@@ -123,22 +111,54 @@ public class PostLoginUI extends UserInputHandler {
             printHelp();
             return;
         }
-        int gameIndex;
-        try {
-            gameIndex = Integer.parseInt(args[0]);
-        } catch (NumberFormatException e) {
-            System.out.printf("Invalid argument '%s': should be an integer", args[0]);
+        if (!verifyGameCount()) {
             return;
         }
-        if (gameIndex < 0 || gameIndex >= games.length) {
-            System.out.printf("Game index %d is out of range. Should be between 0 and %d, inclusive", gameIndex, games.length - 1);
+        int gameIndex = verifyGameIndex(args[0]);
+        if (gameIndex < 0) {
             return;
         }
-        ServerResponse<?> response = serverFacade.observeGame(authToken, games[gameIndex].gameID());
+        ServerResponse<?> response;
     }
 
     @Override
     protected void printHelp() {
         System.out.println(HELP);
+    }
+
+    private boolean verifyGameCount() {
+        if (games.length == 0) {
+            System.out.println("No games loaded. Try listing the games or creating a new one");
+            return false;
+        } else {
+            return true;
+        }
+    }
+
+    private int verifyGameIndex(String gameIndex) {
+        try {
+            int result = Integer.parseInt(gameIndex);
+            if (result < 0) {
+                System.out.printf("Invalid argument '%d': should be at least zero\n", result);
+                return -1;
+            }
+            if (result >= games.length) {
+                System.out.printf("Invalid argument '%d': should be less than %d\n", result, games.length);
+                return -1;
+            }
+            return result;
+        } catch (NumberFormatException e) {
+            System.out.printf("Invalid argument '%s': should be an integer\n", gameIndex);
+            return -1;
+        }
+    }
+
+    private ChessGame.TeamColor verifyTeamColor(String teamColor) {
+        try {
+            return ChessGame.TeamColor.valueOf(teamColor);
+        } catch (IllegalArgumentException e) {
+            System.out.printf("Invalid argument '%s': should be 'white' or 'black'\n", teamColor);
+            return null;
+        }
     }
 }
