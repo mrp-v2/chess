@@ -21,6 +21,10 @@ public class ServerFacade {
         this.port = port;
     }
 
+    public int getPort() {
+        return port;
+    }
+
     public ServerResponse<AuthResponse> register(String username, String password, String email) {
         return request("POST", "user", new UserData(username, password, email), AuthResponse.class);
     }

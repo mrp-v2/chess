@@ -4,6 +4,7 @@ import chess.ChessGame;
 import chess.ChessPiece;
 import chess.ChessPosition;
 import connection.ServerFacade;
+import connection.WebSocketFacade;
 
 import java.util.Scanner;
 
@@ -12,10 +13,12 @@ public class GameplayUI extends UserInputHandler {
     private static final String[] VERTICAL_LABELS = new String[]{"a", "b", "c", "d", "e", "f", "g", "h"};
 
     private final ChessGame game;
+    private final WebSocketFacade socketFacade;
 
     public GameplayUI(Scanner scanner, ChessGame game, ServerFacade serverFacade) {
         super(scanner, "exit", serverFacade);
         this.game = game;
+        this.socketFacade = new WebSocketFacade(serverFacade.getPort());
     }
 
     @Override

@@ -33,6 +33,7 @@ public class Server {
         Spark.get("/game", this::getGames);
         Spark.post("/game", this::createGame);
         Spark.put("/game", this::joinGame);
+        Spark.webSocket("/ws", WebSocketServer.class);
     }
 
     private Object clear(Request req, Response res) {
@@ -80,36 +81,12 @@ public class Server {
         return authWrap(req, res, this::authenticatedGetGames);
     }
 
-    private Object authenticatedGetGames(Request req, Response res, ServiceResponse auth) {
-        return GameService.getInstance().getGames().send(res);
-    }
-
     private Object createGame(Request req, Response res) {
         return authWrap(req, res, this::authenticatedCreateGame);
     }
 
-    private Object authenticatedCreateGame(Request req, Response res, ServiceResponse auth) {
-        CreateGameRequest data;
-        try {
-            data = GSON.fromJson(req.body(), CreateGameRequest.class);
-        } catch (JsonSyntaxException e) {
-            return ErrorModel.BAD_REQUEST.send(res);
-        }
-        return GameService.getInstance().create(data).send(res);
-    }
-
     private Object joinGame(Request req, Response res) {
         return authWrap(req, res, this::authenticatedJoinGame);
-    }
-
-    private Object authenticatedJoinGame(Request req, Response res, ServiceResponse auth) {
-        JoinGameRequest data;
-        try {
-            data = GSON.fromJson(req.body(), JoinGameRequest.class);
-        } catch (JsonSyntaxException e) {
-            return ErrorModel.BAD_REQUEST.send(res);
-        }
-        return GameService.getInstance().join(data, ((UserResponse) auth.data()).username()).send(res);
     }
 
     /**
@@ -123,6 +100,30 @@ public class Server {
         } else {
             return route.handle(req, res, result);
         }
+    }
+
+    private Object authenticatedGetGames(Request req, Response res, ServiceResponse auth) {
+        return GameService.getInstance().getGames().send(res);
+    }
+
+    private Object authenticatedCreateGame(Request req, Response res, ServiceResponse auth) {
+        CreateGameRequest data;
+        try {
+            data = GSON.fromJson(req.body(), CreateGameRequest.class);
+        } catch (JsonSyntaxException e) {
+            return ErrorModel.BAD_REQUEST.send(res);
+        }
+        return GameService.getInstance().create(data).send(res);
+    }
+
+    private Object authenticatedJoinGame(Request req, Response res, ServiceResponse auth) {
+        JoinGameRequest data;
+        try {
+            data = GSON.fromJson(req.body(), JoinGameRequest.class);
+        } catch (JsonSyntaxException e) {
+            return ErrorModel.BAD_REQUEST.send(res);
+        }
+        return GameService.getInstance().join(data, ((UserResponse) auth.data()).username()).send(res);
     }
 
     public void stop() {
