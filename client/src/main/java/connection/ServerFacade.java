@@ -143,10 +143,6 @@ public class ServerFacade {
         return authenticatedRequest("PUT", "game", authToken, new JoinGameRequest(color, gameID), null);
     }
 
-    public ServerResponse<?> observeGame(String authToken, int gameID) {
-        return ServerResponse.connectionFailed(); // TODO
-    }
-
     public ServerResponse<?> clear() {
         return request("DELETE", "db");
     }

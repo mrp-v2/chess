@@ -113,12 +113,6 @@ public class ServerFacadeTests {
     }
 
     @Test
-    void observeGame() {
-        // TODO
-        assertTrue(true);
-    }
-
-    @Test
     @BeforeEach
     @AfterEach
     void clearNoError() {

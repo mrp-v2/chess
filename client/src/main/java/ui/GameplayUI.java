@@ -11,7 +11,7 @@ public class GameplayUI extends UserInputHandler {
 
     private static final String[] VERTICAL_LABELS = new String[]{"a", "b", "c", "d", "e", "f", "g", "h"};
 
-    private ChessGame game;
+    private final ChessGame game;
 
     public GameplayUI(Scanner scanner, ChessGame game, ServerFacade serverFacade) {
         super(scanner, "exit", serverFacade);
@@ -25,11 +25,43 @@ public class GameplayUI extends UserInputHandler {
 
     @Override
     protected void handleArgs(String[] args) {
-        switch (args[0]) {
-            default:
-                break; // TODO
-        }
         printBoards();
+    }
+
+    private void printBoards() {
+        printBoardBlack();
+        System.out.println();
+        printBoardWhite();
+    }
+
+    private void printBoardBlack() {
+        for (int i = 0; i < 8; i++) {
+            System.out.print(EscapeSequences.SET_BG_COLOR_YELLOW + " " + EscapeSequences.SET_TEXT_COLOR_BLACK + VERTICAL_LABELS[i] + EscapeSequences.RESET_TEXT_COLOR + " ");
+            for (int col = 8; col > 0; col--) {
+                printBoardBody(i + 1, col);
+            }
+            System.out.println(EscapeSequences.RESET_BG_COLOR);
+        }
+        System.out.print(EscapeSequences.SET_BG_COLOR_YELLOW + EscapeSequences.SET_TEXT_COLOR_BLACK + "   ");
+        for (int col = 8; col > 0; col--) {
+            printColumnLabel(col);
+        }
+        System.out.println(EscapeSequences.RESET_BG_COLOR + EscapeSequences.RESET_TEXT_COLOR);
+    }
+
+    private void printBoardWhite() {
+        for (int i = 7; i >= 0; i--) {
+            System.out.print(EscapeSequences.SET_BG_COLOR_YELLOW + " " + EscapeSequences.SET_TEXT_COLOR_BLACK + VERTICAL_LABELS[i] + EscapeSequences.RESET_TEXT_COLOR + " ");
+            for (int col = 1; col <= 8; col++) {
+                printBoardBody(i + 1, col);
+            }
+            System.out.println(EscapeSequences.RESET_BG_COLOR);
+        }
+        System.out.print(EscapeSequences.SET_BG_COLOR_YELLOW + EscapeSequences.SET_TEXT_COLOR_BLACK + "   ");
+        for (int col = 1; col <= 8; col++) {
+            printColumnLabel(col);
+        }
+        System.out.println(EscapeSequences.RESET_BG_COLOR + EscapeSequences.RESET_TEXT_COLOR);
     }
 
     private String translate(ChessPosition pos) {
@@ -53,22 +85,6 @@ public class GameplayUI extends UserInputHandler {
         };
     }
 
-    private void printBoardBlack() {
-        for (int i = 0; i < 8; i++) {
-            System.out.print(EscapeSequences.SET_BG_COLOR_YELLOW + " " + EscapeSequences.SET_TEXT_COLOR_BLACK + VERTICAL_LABELS[i] + EscapeSequences.RESET_TEXT_COLOR + " ");
-            for (int col = 8; col > 0; col--) {
-                System.out.print(col % 2 == (i + 1) % 2 ? EscapeSequences.SET_BG_COLOR_DARK_GREY : EscapeSequences.SET_BG_COLOR_LIGHT_GREY);
-                System.out.print(translate(new ChessPosition(i + 1, col)));
-            }
-            System.out.println(EscapeSequences.RESET_BG_COLOR);
-        }
-        System.out.print(EscapeSequences.SET_BG_COLOR_YELLOW + EscapeSequences.SET_TEXT_COLOR_BLACK + "   ");
-        for (int col = 8; col > 0; col--) {
-            printColumnLabel(col);
-        }
-        System.out.println(EscapeSequences.RESET_BG_COLOR + EscapeSequences.RESET_TEXT_COLOR);
-    }
-
     private void printColumnLabel(int col) {
         switch (col) {
             case 2:
@@ -80,25 +96,8 @@ public class GameplayUI extends UserInputHandler {
         System.out.print(" " + col + " ");
     }
 
-    private void printBoardWhite() {
-        for (int i = 7; i >= 0; i--) {
-            System.out.print(EscapeSequences.SET_BG_COLOR_YELLOW + " " + EscapeSequences.SET_TEXT_COLOR_BLACK + VERTICAL_LABELS[i] + EscapeSequences.RESET_TEXT_COLOR + " ");
-            for (int col = 1; col <= 8; col++) {
-                System.out.print(col % 2 == (i + 1) % 2 ? EscapeSequences.SET_BG_COLOR_DARK_GREY : EscapeSequences.SET_BG_COLOR_LIGHT_GREY);
-                System.out.print(translate(new ChessPosition(i + 1, col)));
-            }
-            System.out.println(EscapeSequences.RESET_BG_COLOR);
-        }
-        System.out.print(EscapeSequences.SET_BG_COLOR_YELLOW + EscapeSequences.SET_TEXT_COLOR_BLACK + "   ");
-        for (int col = 1; col <= 8; col++) {
-            printColumnLabel(col);
-        }
-        System.out.println(EscapeSequences.RESET_BG_COLOR + EscapeSequences.RESET_TEXT_COLOR);
-    }
-
-    private void printBoards() {
-        printBoardBlack();
-        System.out.println();
-        printBoardWhite();
+    private void printBoardBody(int row, int col) {
+        System.out.print(col % 2 == row % 2 ? EscapeSequences.SET_BG_COLOR_DARK_GREY : EscapeSequences.SET_BG_COLOR_LIGHT_GREY);
+        System.out.print(translate(new ChessPosition(row, col)));
     }
 }

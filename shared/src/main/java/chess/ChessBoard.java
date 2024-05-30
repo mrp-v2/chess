@@ -23,27 +23,6 @@ public class ChessBoard {
     }
 
     /**
-     * Adds a chess piece to the chessboard
-     *
-     * @param position where to add the piece to
-     * @param piece    the piece to add
-     */
-    public void addPiece(ChessPosition position, ChessPiece piece) {
-        board[position.getColumn() - 1][position.getRow() - 1] = piece;
-    }
-
-    /**
-     * Gets a chess piece on the chessboard
-     *
-     * @param position The position to get the piece from
-     * @return Either the piece at the position, or null if no piece is at that
-     * position
-     */
-    public ChessPiece getPiece(ChessPosition position) {
-        return board[position.getColumn() - 1][position.getRow() - 1];
-    }
-
-    /**
      * Sets the board to the default starting board
      * (How the game of chess normally starts)
      */
@@ -63,12 +42,6 @@ public class ChessBoard {
         setPieces(new ChessPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.KING), new ChessPosition(1, 5));
     }
 
-    private void setPieces(ChessPiece piece, ChessPosition... positions) {
-        for (ChessPosition position : positions) {
-            addPiece(position, piece);
-        }
-    }
-
     private void setPiecesRange(ChessPiece piece, ChessPosition start, ChessPosition end) {
         for (int col = start.getColumn(); col <= end.getColumn(); col++) {
             for (int row = start.getRow(); row <= end.getRow(); row++) {
@@ -77,48 +50,28 @@ public class ChessBoard {
         }
     }
 
-    private abstract static class BaseItr implements Iterator<ChessPosition>, Iterable<ChessPosition> {
-        protected int row, column;
-
-        protected BaseItr() {
-            row = 1;
-            column = 1;
-        }
-
-        @Override
-        public boolean hasNext() {
-            return row <= SIZE && column <= SIZE;
-        }
-
-        @Override
-        public ChessPosition next() {
-            ChessPosition next = new ChessPosition(row, column);
-            advance();
-            return next;
-        }
-
-        protected abstract void advance();
-
-        @Override
-        public Iterator<ChessPosition> iterator() {
-            return this;
+    private void setPieces(ChessPiece piece, ChessPosition... positions) {
+        for (ChessPosition position : positions) {
+            addPiece(position, piece);
         }
     }
 
-    public Iterable<ChessPosition> getPositions() {
-        class Itr extends BaseItr {
+    /**
+     * Adds a chess piece to the chessboard
+     *
+     * @param position where to add the piece to
+     * @param piece    the piece to add
+     */
+    public void addPiece(ChessPosition position, ChessPiece piece) {
+        board[position.getColumn() - 1][position.getRow() - 1] = piece;
+    }
 
-            @Override
-            protected void advance() {
-                column++;
-                if (column > SIZE) {
-                    column = 1;
-                    row++;
-                }
-            }
+    public ChessBoard makeClone() {
+        ChessBoard clone = new ChessBoard();
+        for (ChessPosition pos : getPiecePositions()) {
+            clone.addPiece(pos, getPiece(pos));
         }
-
-        return new Itr();
+        return clone;
     }
 
     public Iterable<ChessPosition> getPiecePositions() {
@@ -147,12 +100,15 @@ public class ChessBoard {
         return new Itr();
     }
 
-    public ChessBoard makeClone() {
-        ChessBoard clone = new ChessBoard();
-        for (ChessPosition pos : getPiecePositions()) {
-            clone.addPiece(pos, getPiece(pos));
-        }
-        return clone;
+    /**
+     * Gets a chess piece on the chessboard
+     *
+     * @param position The position to get the piece from
+     * @return Either the piece at the position, or null if no piece is at that
+     * position
+     */
+    public ChessPiece getPiece(ChessPosition position) {
+        return board[position.getColumn() - 1][position.getRow() - 1];
     }
 
     public void makeMove(ChessMove move) {
@@ -180,5 +136,33 @@ public class ChessBoard {
     @Override
     public int hashCode() {
         return Arrays.deepHashCode(board);
+    }
+
+    private abstract static class BaseItr implements Iterator<ChessPosition>, Iterable<ChessPosition> {
+        protected int row, column;
+
+        protected BaseItr() {
+            row = 1;
+            column = 1;
+        }
+
+        @Override
+        public boolean hasNext() {
+            return row <= SIZE && column <= SIZE;
+        }
+
+        @Override
+        public ChessPosition next() {
+            ChessPosition next = new ChessPosition(row, column);
+            advance();
+            return next;
+        }
+
+        protected abstract void advance();
+
+        @Override
+        public Iterator<ChessPosition> iterator() {
+            return this;
+        }
     }
 }
