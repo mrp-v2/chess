@@ -31,11 +31,6 @@ public class PostLoginUI extends UserInputHandler {
     }
 
     @Override
-    protected void printHelp() {
-        System.out.println(HELP);
-    }
-
-    @Override
     protected void handleArgs(String[] args) {
         switch (args[0]) {
             case "create":
@@ -114,7 +109,7 @@ public class PostLoginUI extends UserInputHandler {
             System.out.printf("Game index %d is out of range. Should be between 0 and %d, inclusive", gameIndex, games.length - 1);
             return;
         }
-        ServerResponse<?> response = serverFacade.joinGame(authToken, games[gameIndex], color);
+        ServerResponse<?> response = serverFacade.joinGame(authToken, games[gameIndex].gameID(), color);
         if (!response.ok()) {
             printError(response);
         } else {
@@ -139,6 +134,11 @@ public class PostLoginUI extends UserInputHandler {
             System.out.printf("Game index %d is out of range. Should be between 0 and %d, inclusive", gameIndex, games.length - 1);
             return;
         }
-        ServerResponse<?> response = serverFacade.observeGame(authToken, games[gameIndex]);
+        ServerResponse<?> response = serverFacade.observeGame(authToken, games[gameIndex].gameID());
+    }
+
+    @Override
+    protected void printHelp() {
+        System.out.println(HELP);
     }
 }
