@@ -155,7 +155,7 @@ public class PostLoginUI extends UserInputHandler {
 
     private ChessGame.TeamColor verifyTeamColor(String teamColor) {
         try {
-            return ChessGame.TeamColor.valueOf(teamColor);
+            return ChessGame.TeamColor.valueOf(teamColor.toUpperCase());
         } catch (IllegalArgumentException e) {
             System.out.printf("Invalid argument '%s': should be 'white' or 'black'\n", teamColor);
             return null;

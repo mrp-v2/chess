@@ -22,10 +22,14 @@ public class WebSocketFacade extends Endpoint implements MessageHandler.Whole<St
 
     @Override
     public void onOpen(Session session, EndpointConfig endpointConfig) {
-
+        try {
+            session.getBasicRemote().sendText("Opened!");
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public void onMessage(String message) {
-
+        System.out.println("got message");
     }
 }

@@ -26,6 +26,7 @@ public class Server {
     }
 
     private void registerEndpoints() {
+        Spark.webSocket("/ws", WebSocketServer.class);
         Spark.delete("/db", this::clear);
         Spark.post("/user", this::register);
         Spark.post("/session", this::login);
@@ -33,7 +34,6 @@ public class Server {
         Spark.get("/game", this::getGames);
         Spark.post("/game", this::createGame);
         Spark.put("/game", this::joinGame);
-        Spark.webSocket("/ws", WebSocketServer.class);
     }
 
     private Object clear(Request req, Response res) {
