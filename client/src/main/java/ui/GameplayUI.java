@@ -8,28 +8,21 @@ import model.GameData;
 
 import java.util.Scanner;
 
-public class GameplayUI extends UserInputHandler {
+public class GameplayUI extends PostLoginUI {
 
     private final WebSocketFacade socketFacade;
     private final ChessGame.TeamColor playerColor;
-    private final AuthResponse auth;
     private GameData game;
 
     public GameplayUI(Scanner scanner, GameData game, ChessGame.TeamColor playerColor, AuthResponse auth, ServerFacade serverFacade) {
-        super(scanner, "exit", serverFacade);
+        super(scanner, "exit", auth, serverFacade);
         this.game = game;
         this.playerColor = playerColor;
-        this.auth = auth;
-        this.socketFacade = new WebSocketFacade(serverFacade.getPort(), this);
+        this.socketFacade = new WebSocketFacade(serverFacade.getPort(), this, auth.authToken(), game.gameID());
     }
 
     @Override
-    protected void printHelp() {
-        System.out.println("Gameplay help - coming soon");
-    }
-
-    @Override
-    protected void handleArgs(String[] args) {
+    protected boolean handleArgs(String[] args) {
         switch (args[0]) {
             case "redraw":
                 printBoard();
@@ -37,7 +30,7 @@ public class GameplayUI extends UserInputHandler {
             case "leave":
                 // exit game - color loses its user
                 socketFacade.leave(auth.authToken(), game.gameID());
-                break;
+                return false;
             case "move":
                 // make a move
                 break;
@@ -47,11 +40,20 @@ public class GameplayUI extends UserInputHandler {
             case "moves":
                 // show the legal moves for a piece
                 break;
+            case "help":
+                printHelp();
+                break;
         }
+        return true;
     }
 
     public void printBoard() {
         PrintBoardHelper.printBoard(game.game().getBoard(), playerColor);
+    }
+
+    @Override
+    protected void printHelp() {
+        System.out.println("Gameplay help - coming soon");
     }
 
     public void updateBoard(GameData game) {

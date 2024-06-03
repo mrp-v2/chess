@@ -8,8 +8,8 @@ import java.util.Scanner;
 public abstract class UserInputHandler {
 
     protected final Scanner scanner;
-    private final String exitCommand;
     protected final ServerFacade serverFacade;
+    private final String exitCommand;
 
     protected UserInputHandler(Scanner scanner, String exitCommand, ServerFacade serverFacade) {
         this.scanner = scanner;
@@ -20,7 +20,8 @@ public abstract class UserInputHandler {
     public void run() {
         printHelp();
         String command;
-        while (true) {
+        boolean again = true;
+        while (again) {
             System.out.print("> ");
             command = scanner.nextLine();
             if (exitCommand.equals(command)) {
@@ -28,7 +29,7 @@ public abstract class UserInputHandler {
             } else {
                 String[] args = command.split(" ");
                 if (args.length != 0) {
-                    handleArgs(args);
+                    again = handleArgs(args);
                 }
             }
         }
@@ -36,7 +37,7 @@ public abstract class UserInputHandler {
 
     protected abstract void printHelp();
 
-    protected abstract void handleArgs(String[] args);
+    protected abstract boolean handleArgs(String[] args);
 
     protected void printError(ServerResponse<?> response) {
         if (response.responseCode() == 0) {

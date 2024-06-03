@@ -25,7 +25,7 @@ public class MainUI extends UserInputHandler {
     }
 
     @Override
-    protected void handleArgs(String[] args) {
+    protected boolean handleArgs(String[] args) {
         switch (args[0]) {
             case "login":
                 login(Arrays.copyOfRange(args, 1, args.length));
@@ -37,6 +37,7 @@ public class MainUI extends UserInputHandler {
                 printHelp();
                 break;
         }
+        return true;
     }
 
     private void login(String[] args) {

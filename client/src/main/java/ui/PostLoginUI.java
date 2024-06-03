@@ -21,18 +21,22 @@ public class PostLoginUI extends UserInputHandler {
                                        join <game number> <WHITE|BLACK>
                                        observe <game number>""";
 
-    private final AuthResponse auth;
+    protected final AuthResponse auth;
 
     private GameData[] games;
 
     public PostLoginUI(Scanner scanner, AuthResponse auth, ServerFacade serverFacade) {
-        super(scanner, "logout", serverFacade);
+        this(scanner, "logout", auth, serverFacade);
+    }
+
+    protected PostLoginUI(Scanner scanner, String exitCommand, AuthResponse auth, ServerFacade serverFacade) {
+        super(scanner, exitCommand, serverFacade);
         this.auth = auth;
         this.games = new GameData[0];
     }
 
     @Override
-    protected void handleArgs(String[] args) {
+    protected boolean handleArgs(String[] args) {
         switch (args[0]) {
             case "create":
                 createGame(Arrays.copyOfRange(args, 1, args.length));
@@ -50,6 +54,7 @@ public class PostLoginUI extends UserInputHandler {
                 printHelp();
                 break;
         }
+        return true;
     }
 
     private void createGame(String[] args) {
