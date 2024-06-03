@@ -1,50 +1,64 @@
 package websocket.commands;
 
+import model.JsonSerializable;
+
 import java.util.Objects;
 
 /**
  * Represents a command a user can send the server over a websocket
- * 
+ * <p>
  * Note: You can add to this class, but you should not alter the existing
  * methods.
  */
-public class UserGameCommand {
+public class UserGameCommand implements JsonSerializable {
 
-    public UserGameCommand(String authToken) {
+    public final int gameID;
+    public final String authToken;
+    public final CommandType commandType;
+
+    protected UserGameCommand(String authToken, int gameID, CommandType commandType) {
         this.authToken = authToken;
+        this.gameID = gameID;
+        this.commandType = commandType;
     }
 
-    public enum CommandType {
-        CONNECT,
-        MAKE_MOVE,
-        LEAVE,
-        RESIGN
+    public static UserGameCommand connect(String authToken, int gameID) {
+        return new UserGameCommand(authToken, gameID, CommandType.CONNECT);
     }
 
-    protected CommandType commandType;
+    public static UserGameCommand leave(String authToken, int gameID) {
+        return new UserGameCommand(authToken, gameID, CommandType.LEAVE);
+    }
 
-    private final String authToken;
+    public static UserGameCommand resign(String authToken, int gameID) {
+        return new UserGameCommand(authToken, gameID, CommandType.RESIGN);
+    }
 
-    public String getAuthString() {
-        return authToken;
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof UserGameCommand that)) {
+            return false;
+        }
+        return commandType == that.commandType && Objects.equals(authToken, that.authToken) && gameID == that.gameID;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(commandType, authToken, gameID);
     }
 
     public CommandType getCommandType() {
         return this.commandType;
     }
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o)
-            return true;
-        if (!(o instanceof UserGameCommand))
-            return false;
-        UserGameCommand that = (UserGameCommand) o;
-        return getCommandType() == that.getCommandType() && Objects.equals(getAuthString(), that.getAuthString());
+    public String getAuthString() {
+        return authToken;
     }
 
-    @Override
-    public int hashCode() {
-        return Objects.hash(getCommandType(), getAuthString());
+    public enum CommandType {
+        CONNECT, MAKE_MOVE, LEAVE, RESIGN
     }
 }
