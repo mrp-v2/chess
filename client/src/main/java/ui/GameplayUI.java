@@ -3,21 +3,24 @@ package ui;
 import chess.ChessGame;
 import connection.ServerFacade;
 import connection.WebSocketFacade;
+import model.AuthResponse;
+import model.GameData;
 
 import java.util.Scanner;
 
 public class GameplayUI extends UserInputHandler {
 
-
-    private final ChessGame game;
     private final WebSocketFacade socketFacade;
     private final ChessGame.TeamColor playerColor;
+    private final AuthResponse auth;
+    private GameData game;
 
-    public GameplayUI(Scanner scanner, ChessGame game, ChessGame.TeamColor playerColor, ServerFacade serverFacade) {
+    public GameplayUI(Scanner scanner, GameData game, ChessGame.TeamColor playerColor, AuthResponse auth, ServerFacade serverFacade) {
         super(scanner, "exit", serverFacade);
         this.game = game;
         this.playerColor = playerColor;
-        this.socketFacade = new WebSocketFacade(serverFacade.getPort());
+        this.auth = auth;
+        this.socketFacade = new WebSocketFacade(serverFacade.getPort(), this);
     }
 
     @Override
@@ -29,10 +32,11 @@ public class GameplayUI extends UserInputHandler {
     protected void handleArgs(String[] args) {
         switch (args[0]) {
             case "redraw":
-                PrintBoardHelper.printBoard(game.getBoard(), playerColor);
+                printBoard();
                 break;
             case "leave":
                 // exit game - color loses its user
+                socketFacade.leave(auth.authToken(), game.gameID());
                 break;
             case "move":
                 // make a move
@@ -44,5 +48,14 @@ public class GameplayUI extends UserInputHandler {
                 // show the legal moves for a piece
                 break;
         }
+    }
+
+    public void printBoard() {
+        PrintBoardHelper.printBoard(game.game().getBoard(), playerColor);
+    }
+
+    public void updateBoard(GameData game) {
+        this.game = game;
+        printBoard();
     }
 }

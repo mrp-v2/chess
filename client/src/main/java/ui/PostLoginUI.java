@@ -3,6 +3,7 @@ package ui;
 import chess.ChessGame;
 import connection.ServerFacade;
 import connection.ServerResponse;
+import model.AuthResponse;
 import model.GameData;
 import model.GameResponse;
 import model.GamesResponse;
@@ -20,13 +21,13 @@ public class PostLoginUI extends UserInputHandler {
                                        join <game number> <WHITE|BLACK>
                                        observe <game number>""";
 
-    private final String authToken;
+    private final AuthResponse auth;
 
     private GameData[] games;
 
-    public PostLoginUI(Scanner scanner, String authToken, ServerFacade serverFacade) {
+    public PostLoginUI(Scanner scanner, AuthResponse auth, ServerFacade serverFacade) {
         super(scanner, "logout", serverFacade);
-        this.authToken = authToken;
+        this.auth = auth;
         this.games = new GameData[0];
     }
 
@@ -56,7 +57,7 @@ public class PostLoginUI extends UserInputHandler {
             printHelp();
             return;
         }
-        ServerResponse<GameResponse> response = serverFacade.createGame(authToken, args[0]);
+        ServerResponse<GameResponse> response = serverFacade.createGame(auth.authToken(), args[0]);
         if (!response.ok()) {
             printError(response);
         } else {
@@ -69,7 +70,7 @@ public class PostLoginUI extends UserInputHandler {
             printHelp();
             return;
         }
-        ServerResponse<GamesResponse> response = serverFacade.getGames(authToken);
+        ServerResponse<GamesResponse> response = serverFacade.getGames(auth.authToken());
         if (!response.ok()) {
             printError(response);
             return;
@@ -97,13 +98,31 @@ public class PostLoginUI extends UserInputHandler {
         if (gameIndex < 0 || color == null) {
             return;
         }
-        ServerResponse<?> response = serverFacade.joinGame(authToken, games[gameIndex].gameID(), color);
-        if (!response.ok()) {
-            printError(response);
-        } else {
-            GameplayUI gameplay = new GameplayUI(scanner, new ChessGame(), color, serverFacade);
-            gameplay.run();
+        GameData game = games[gameIndex];
+        boolean serverJoin = true;
+        switch (color) {
+            case WHITE:
+                if (auth.username().equals(game.whiteUsername())) {
+                    serverJoin = false;
+                }
+                break;
+            case BLACK:
+                if (auth.username().equals(game.blackUsername())) {
+                    serverJoin = false;
+                }
         }
+        GameplayUI gameplay;
+        if (serverJoin) {
+            ServerResponse<GameData> response = serverFacade.joinGame(auth.authToken(), game.gameID(), color);
+            if (!response.ok()) {
+                printError(response);
+                return;
+            }
+            gameplay = new GameplayUI(scanner, response.data(), color, auth, serverFacade);
+        } else {
+            gameplay = new GameplayUI(scanner, game, color, auth, serverFacade);
+        }
+        gameplay.run();
     }
 
     private void observeGame(String[] args) {

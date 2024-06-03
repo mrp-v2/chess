@@ -12,15 +12,15 @@ public class GameService {
 
     private final GameAccess gameAccess;
 
+    private GameService() {
+        gameAccess = SQLGameAccess.getInstance();
+    }
+
     public static GameService getInstance() {
         if (instance == null) {
             instance = new GameService();
         }
         return instance;
-    }
-
-    private GameService() {
-        gameAccess = SQLGameAccess.getInstance();
     }
 
     public ServiceResponse clear() {
@@ -53,6 +53,34 @@ public class GameService {
         return Wrapper.success(new GameResponse(result));
     }
 
+    public ServiceResponse getGame(int gameID) {
+        GameData result;
+        try {
+            result = gameAccess.getGameData(gameID);
+        } catch (DataAccessException e) {
+            return ErrorModel.DATABASE_ERROR;
+        }
+        return Wrapper.success(result);
+    }
+
+    public ServiceResponse leave(GameData game, String username) {
+        GameData modified = null;
+        if (username.equals(game.whiteUsername())) {
+            modified = game.setWhiteUser(null);
+        } else if (username.equals(game.blackUsername())) {
+            modified = game.setBlackUser(null);
+        }
+        if (modified == null) {
+            return ServiceResponse.SUCCESS;
+        }
+        try {
+            gameAccess.updateGame(game.gameID(), modified);
+        } catch (DataAccessException e) {
+            return ErrorModel.DATABASE_ERROR;
+        }
+        return ServiceResponse.SUCCESS;
+    }
+
     public ServiceResponse join(JoinGameRequest data, String username) {
         // verify the game exists and the request is valid
         GameData result;
@@ -64,17 +92,20 @@ public class GameService {
         if (result == null || data.playerColor() == null) {
             return ErrorModel.BAD_REQUEST;
         }
+        if (username.equals(result.blackUsername()) || username.equals(result.whiteUsername())) {
+            return ErrorModel.ALREADY_JOINED;
+        }
         GameData modified = null;
         // add player to correct color
         switch (data.playerColor()) {
             case WHITE:
                 if (result.whiteUsername() == null) {
-                    modified = result.addWhiteUser(username);
+                    modified = result.setWhiteUser(username);
                 }
                 break;
             case BLACK:
                 if (result.blackUsername() == null) {
-                    modified = result.addBlackUser(username);
+                    modified = result.setBlackUser(username);
                 }
                 break;
         }
@@ -88,6 +119,6 @@ public class GameService {
         } catch (DataAccessException e) {
             return ErrorModel.DATABASE_ERROR;
         }
-        return ServiceResponse.SUCCESS;
+        return Wrapper.success(modified);
     }
 }

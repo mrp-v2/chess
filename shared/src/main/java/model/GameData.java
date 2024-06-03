@@ -1,16 +1,15 @@
 package model;
 
 import chess.ChessGame;
-import com.google.gson.Gson;
 
 public record GameData(int gameID, String whiteUsername, String blackUsername, String gameName,
-                       ChessGame game) {
+                       ChessGame game) implements JsonSerializable {
 
-    public GameData addWhiteUser(String user) {
+    public GameData setWhiteUser(String user) {
         return new GameData(gameID, user, blackUsername, gameName, game);
     }
 
-    public GameData addBlackUser(String user) {
+    public GameData setBlackUser(String user) {
         return new GameData(gameID, whiteUsername, user, gameName, game);
     }
 }

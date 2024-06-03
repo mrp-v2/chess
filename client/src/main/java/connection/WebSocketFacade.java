@@ -1,5 +1,11 @@
 package connection;
 
+import model.JsonSerializable;
+import ui.GameplayUI;
+import websocket.commands.UserGameCommand;
+import websocket.messages.GameMessage;
+import websocket.messages.ServerMessage;
+
 import javax.websocket.*;
 import java.io.IOException;
 import java.net.URI;
@@ -8,8 +14,10 @@ import java.net.URISyntaxException;
 public class WebSocketFacade extends Endpoint implements MessageHandler.Whole<String> {
 
     private final Session session;
+    private final GameplayUI ui;
 
-    public WebSocketFacade(int port) {
+    public WebSocketFacade(int port, GameplayUI ui) {
+        this.ui = ui;
         try {
             URI uri = new URI("ws://localhost:" + port + "/ws");
             WebSocketContainer container = ContainerProvider.getWebSocketContainer();
@@ -30,6 +38,22 @@ public class WebSocketFacade extends Endpoint implements MessageHandler.Whole<St
     }
 
     public void onMessage(String message) {
-        System.out.println("got message");
+        ServerMessage serverMessage = JsonSerializable.GSON.fromJson(message, ServerMessage.class);
+        switch (serverMessage.serverMessageType) {
+            case LOAD_GAME:
+                ui.updateBoard(((GameMessage) serverMessage).game);
+        }
+    }
+
+    public void leave(String auth, int gameID) {
+        sendData(UserGameCommand.leave(auth, gameID));
+    }
+
+    private void sendData(JsonSerializable data) {
+        try {
+            session.getBasicRemote().sendText(data.toJson());
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 }

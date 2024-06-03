@@ -143,7 +143,7 @@ public class ServerFacade {
         return processResponse(connection, resultType);
     }
 
-    public ServerResponse<?> joinGame(String authToken, int gameID, ChessGame.TeamColor color) {
+    public ServerResponse<GameData> joinGame(String authToken, int gameID, ChessGame.TeamColor color) {
         return authenticatedRequest("PUT", "game", authToken, new JoinGameRequest(color, gameID), null);
     }
 
