@@ -144,7 +144,7 @@ public class ServerFacade {
     }
 
     public ServerResponse<GameData> joinGame(String authToken, int gameID, ChessGame.TeamColor color) {
-        return authenticatedRequest("PUT", "game", authToken, new JoinGameRequest(color, gameID), null);
+        return authenticatedRequest("PUT", "game", authToken, new JoinGameRequest(color, gameID), GameData.class);
     }
 
     public ServerResponse<?> clear() {
