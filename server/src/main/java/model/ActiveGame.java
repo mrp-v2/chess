@@ -24,6 +24,7 @@ public class ActiveGame {
         NotificationMessage message = NotificationMessage.joinNotification(username, ChessGame.TeamColor.WHITE);
         notifyOtherUsers(username, message);
         return () -> {
+            this.white = null;
             notifyUsersOfLostConnection(username);
         };
     }
@@ -67,6 +68,7 @@ public class ActiveGame {
         NotificationMessage message = NotificationMessage.joinNotification(username, ChessGame.TeamColor.BLACK);
         notifyOtherUsers(username, message);
         return () -> {
+            this.black = null;
             notifyUsersOfLostConnection(username);
         };
     }
@@ -76,6 +78,9 @@ public class ActiveGame {
         NotificationMessage message = new NotificationMessage(String.format("%s started observing the game", username));
         notifyOtherUsers(username, message);
         return () -> {
+            observers.removeIf(info -> {
+                return info.username().equals(username);
+            });
             removeObserver(username);
         };
     }
@@ -88,7 +93,7 @@ public class ActiveGame {
     }
 
     private void notifyUsersOfLeaving(String username) {
-        notifyUsers(new NotificationMessage(String.format("%s left the game", username)));
+        notifyOtherUsers(username, new NotificationMessage(String.format("%s left the game", username)));
     }
 
     public boolean isActive() {
