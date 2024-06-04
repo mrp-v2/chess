@@ -7,6 +7,8 @@ import java.util.Scanner;
 
 public abstract class UserInputHandler {
 
+    public static final String COMMAND_PREFIX = "> ";
+
     protected final Scanner scanner;
     protected final ServerFacade serverFacade;
     private final String exitCommand;
@@ -22,7 +24,7 @@ public abstract class UserInputHandler {
         String command;
         boolean again = true;
         while (again) {
-            System.out.print("> ");
+            System.out.print(COMMAND_PREFIX);
             command = scanner.nextLine();
             if (exitCommand.equals(command)) {
                 break;
@@ -38,6 +40,17 @@ public abstract class UserInputHandler {
     protected abstract void printHelp();
 
     protected abstract boolean handleArgs(String[] args);
+
+    protected void printInterrupt(String str) {
+        System.out.println(EscapeSequences.ERASE_LINE + str);
+        System.out.print(COMMAND_PREFIX);
+    }
+
+    protected void printInterrupt(Runnable run) {
+        System.out.print(EscapeSequences.ERASE_LINE);
+        run.run();
+        System.out.print(COMMAND_PREFIX);
+    }
 
     protected void printError(ServerResponse<?> response) {
         if (response.responseCode() == 0) {

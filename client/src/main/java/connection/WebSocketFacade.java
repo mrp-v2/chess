@@ -4,6 +4,7 @@ import model.JsonSerializable;
 import ui.GameplayUI;
 import websocket.commands.UserGameCommand;
 import websocket.messages.GameMessage;
+import websocket.messages.NotificationMessage;
 import websocket.messages.ServerMessage;
 
 import javax.websocket.*;
@@ -24,10 +25,7 @@ public class WebSocketFacade implements MessageHandler.Whole<String> {
             this.session = container.connectToServer(new Endpoint() {
                 @Override
                 public void onOpen(Session session, EndpointConfig endpointConfig) {
-                    if (!session.equals(WebSocketFacade.this.session)) {
-                        throw new RuntimeException("Multiple sessions");
-                    }
-                    sendData(UserGameCommand.connect(auth, gameID));
+                    sendData(session, UserGameCommand.connect(auth, gameID));
                 }
             }, uri);
             this.session.addMessageHandler(this);
@@ -36,7 +34,7 @@ public class WebSocketFacade implements MessageHandler.Whole<String> {
         }
     }
 
-    private void sendData(JsonSerializable data) {
+    private static void sendData(Session session, JsonSerializable data) {
         try {
             session.getBasicRemote().sendText(data.toJson());
         } catch (IOException e) {
@@ -49,10 +47,16 @@ public class WebSocketFacade implements MessageHandler.Whole<String> {
         switch (serverMessage.serverMessageType) {
             case LOAD_GAME:
                 ui.updateBoard(((GameMessage) serverMessage).game);
+            case NOTIFICATION:
+                ui.notification(((NotificationMessage) serverMessage).message);
         }
     }
 
     public void leave(String auth, int gameID) {
         sendData(UserGameCommand.leave(auth, gameID));
+    }
+
+    private void sendData(JsonSerializable data) {
+        sendData(session, data);
     }
 }

@@ -48,7 +48,7 @@ public class GameplayUI extends PostLoginUI {
     }
 
     public void printBoard() {
-        PrintBoardHelper.printBoard(game.game().getBoard(), playerColor);
+        printInterrupt(this::printBoardInterrupt);
     }
 
     @Override
@@ -56,8 +56,16 @@ public class GameplayUI extends PostLoginUI {
         System.out.println("Gameplay help - coming soon");
     }
 
+    private void printBoardInterrupt() {
+        PrintBoardHelper.printBoard(game.game().getBoard(), playerColor);
+    }
+
     public void updateBoard(GameData game) {
         this.game = game;
         printBoard();
+    }
+
+    public void notification(String message) {
+        printInterrupt(message);
     }
 }

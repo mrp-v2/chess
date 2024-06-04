@@ -60,6 +60,9 @@ public class GameService {
         } catch (DataAccessException e) {
             return ErrorModel.DATABASE_ERROR;
         }
+        if (result == null) {
+            return ErrorModel.BAD_REQUEST;
+        }
         return Wrapper.success(result);
     }
 
