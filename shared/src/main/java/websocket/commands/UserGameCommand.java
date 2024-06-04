@@ -22,16 +22,16 @@ public class UserGameCommand implements JsonSerializable {
         this.commandType = commandType;
     }
 
-    public static UserGameCommand connect(String authToken, int gameID) {
-        return new UserGameCommand(authToken, gameID, CommandType.CONNECT);
+    public static UserCommand connect(String authToken, int gameID) {
+        return new UserCommand(authToken, gameID, CommandType.CONNECT);
     }
 
-    public static UserGameCommand leave(String authToken, int gameID) {
-        return new UserGameCommand(authToken, gameID, CommandType.LEAVE);
+    public static UserCommand leave(String authToken, int gameID) {
+        return new UserCommand(authToken, gameID, CommandType.LEAVE);
     }
 
-    public static UserGameCommand resign(String authToken, int gameID) {
-        return new UserGameCommand(authToken, gameID, CommandType.RESIGN);
+    public static UserCommand resign(String authToken, int gameID) {
+        return new UserCommand(authToken, gameID, CommandType.RESIGN);
     }
 
     @Override
