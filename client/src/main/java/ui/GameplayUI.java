@@ -2,12 +2,14 @@ package ui;
 
 import chess.ChessGame;
 import chess.ChessMove;
+import chess.ChessPiece;
 import chess.ChessPosition;
 import connection.ServerFacade;
 import connection.WebSocketFacade;
 import model.AuthResponse;
 import model.GameData;
 
+import java.util.Collection;
 import java.util.Scanner;
 
 public class GameplayUI extends PostLoginUI {
@@ -38,21 +40,23 @@ public class GameplayUI extends PostLoginUI {
                 printBoard();
                 break;
             case "leave":
-                // exit game - color loses its user
                 socketFacade.leave(auth.authToken(), game.gameID());
                 return false;
             case "move":
-                if (args.length != 3) {
-                    printHelp();
+                if (args.length == 3) {
+                    handleMove(args[1], args[2], null);
                     break;
                 }
-                handleMove(args[1], args[2]);
+                if (args.length == 4) {
+                    handleMove(args[1], args[2], args[3]);
+                }
+                printHelp();
                 break;
             case "resign":
                 handleResign();
                 break;
             case "moves":
-                // show the legal moves for a piece
+                handleShowMoves(args[1]);
                 break;
             case "help":
                 printHelp();
@@ -65,12 +69,7 @@ public class GameplayUI extends PostLoginUI {
         printInterrupt(this::printBoardInterrupt);
     }
 
-    @Override
-    protected void printHelp() {
-        System.out.println(HELP);
-    }
-
-    private void handleMove(String from, String to) {
+    private void handleMove(String from, String to, String promotionPiece) {
         if (from.length() != 2) {
             System.out.printf("invalid position '%s', should be two characters\n", from);
             return;
@@ -89,11 +88,43 @@ public class GameplayUI extends PostLoginUI {
             System.out.printf("Invalid position '%s'\n", to);
             return;
         }
-        socketFacade.move(auth.authToken(), game.gameID(), new ChessMove(fromPos, toPos));
+
+        ChessPiece.PieceType promotion = null;
+        if (promotionPiece != null) {
+            try {
+                promotion = ChessPiece.PieceType.valueOf(promotionPiece);
+            } catch (IllegalArgumentException e) {
+                System.out.printf("'%s' is not a valid piece type\n", promotionPiece);
+            }
+        }
+        socketFacade.move(auth.authToken(), game.gameID(), new ChessMove(fromPos, toPos, promotion));
+    }
+
+    @Override
+    protected void printHelp() {
+        System.out.println(HELP);
     }
 
     private void handleResign() {
         ResignUI ui = new ResignUI(scanner, serverFacade);
+    }
+
+    private void handleShowMoves(String position) {
+        if (position.length() != 2) {
+            System.out.printf("invalid position '%s', should be two characters\n", position);
+            return;
+        }
+        ChessPosition pos = new ChessPosition(position);
+        if (!pos.isValid()) {
+            System.out.printf("invalid position '%s'\n", pos);
+            return;
+        }
+        Collection<ChessMove> moves = game.game().validMoves(pos);
+        if (moves == null) {
+            System.out.printf("no valid moves for piece at %s\n", position);
+            return;
+        }
+        PrintBoardHelper.printBoard(game.game().getBoard(), playerColor, moves);
     }
 
     private void printBoardInterrupt() {

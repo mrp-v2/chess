@@ -1,26 +1,24 @@
 package ui;
 
-import chess.ChessBoard;
-import chess.ChessGame;
-import chess.ChessPiece;
-import chess.ChessPosition;
+import chess.*;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 
 public class PrintBoardHelper {
     private static final String[] VERTICAL_LABELS = new String[]{"a", "b", "c", "d", "e", "f", "g", "h"};
 
     public static void printBoard(ChessBoard board, ChessGame.TeamColor perspective) {
-        if (perspective == ChessGame.TeamColor.BLACK) {
-            printBlack(board);
-        } else {
-            printWhite(board);
-        }
+        printBoard(board, perspective, Collections.emptyList());
     }
 
-    public static void printWhite(ChessBoard board) {
+    public static void printWhite(ChessBoard board, ChessPosition origin, Collection<ChessPosition> destinations) {
         for (int i = 7; i >= 0; i--) {
             System.out.print(EscapeSequences.SET_BG_COLOR_YELLOW + " " + EscapeSequences.SET_TEXT_COLOR_BLACK + VERTICAL_LABELS[i] + EscapeSequences.RESET_TEXT_COLOR + " ");
             for (int col = 1; col <= 8; col++) {
-                printBoardBody(board, i + 1, col);
+                ChessPosition current = new ChessPosition(i + 1, col);
+                printPosition(board, current, origin, destinations);
             }
             System.out.println(EscapeSequences.RESET_BG_COLOR);
         }
@@ -29,11 +27,6 @@ public class PrintBoardHelper {
             printColumnLabel(col);
         }
         System.out.println(EscapeSequences.RESET_BG_COLOR + EscapeSequences.RESET_TEXT_COLOR);
-    }
-
-    private static void printBoardBody(ChessBoard board, int row, int col) {
-        System.out.print(col % 2 == row % 2 ? EscapeSequences.SET_BG_COLOR_DARK_GREY : EscapeSequences.SET_BG_COLOR_LIGHT_GREY);
-        System.out.print(translate(board, new ChessPosition(row, col)));
     }
 
     private static void printColumnLabel(int col) {
@@ -45,6 +38,24 @@ public class PrintBoardHelper {
                 System.out.print(" ");
         }
         System.out.print(" " + col + " ");
+    }
+
+    private static void printPosition(ChessBoard board, ChessPosition position, ChessPosition origin, Collection<ChessPosition> destinations) {
+        if (position.equals(origin)) {
+            printBoardBody(board, position.getRow(), position.getColumn(), EscapeSequences.SET_BG_COLOR_BLUE);
+        } else if (destinations.contains(position)) {
+            printBoardBody(board, position.getRow(), position.getColumn(), EscapeSequences.SET_BG_COLOR_GREEN);
+        } else {
+            printBoardBody(board, position.getRow(), position.getColumn(), null);
+        }
+    }
+
+    private static void printBoardBody(ChessBoard board, int row, int col, String colorOverride) {
+        if (colorOverride == null) {
+            colorOverride = col % 2 == row % 2 ? EscapeSequences.SET_BG_COLOR_DARK_GREY : EscapeSequences.SET_BG_COLOR_LIGHT_GREY;
+        }
+        System.out.print(colorOverride);
+        System.out.print(translate(board, new ChessPosition(row, col)));
     }
 
     private static String translate(ChessBoard board, ChessPosition pos) {
@@ -68,11 +79,12 @@ public class PrintBoardHelper {
         };
     }
 
-    public static void printBlack(ChessBoard board) {
+    public static void printBlack(ChessBoard board, ChessPosition origin, Collection<ChessPosition> destinations) {
         for (int i = 0; i < 8; i++) {
             System.out.print(EscapeSequences.SET_BG_COLOR_YELLOW + " " + EscapeSequences.SET_TEXT_COLOR_BLACK + VERTICAL_LABELS[i] + EscapeSequences.RESET_TEXT_COLOR + " ");
             for (int col = 8; col > 0; col--) {
-                printBoardBody(board, i + 1, col);
+                ChessPosition current = new ChessPosition(i + 1, col);
+                printPosition(board, current, origin, destinations);
             }
             System.out.println(EscapeSequences.RESET_BG_COLOR);
         }
@@ -81,5 +93,21 @@ public class PrintBoardHelper {
             printColumnLabel(col);
         }
         System.out.println(EscapeSequences.RESET_BG_COLOR + EscapeSequences.RESET_TEXT_COLOR);
+    }
+
+    public static void printBoard(ChessBoard board, ChessGame.TeamColor perspective, Collection<ChessMove> moves) {
+        ChessPosition origin = null;
+        Collection<ChessPosition> destinations = new ArrayList<>();
+        if (!moves.isEmpty()) {
+            origin = moves.iterator().next().getStartPosition();
+            for (ChessMove move : moves) {
+                destinations.add(move.getEndPosition());
+            }
+        }
+        if (perspective == ChessGame.TeamColor.BLACK) {
+            printBlack(board, origin, destinations);
+        } else {
+            printWhite(board, origin, destinations);
+        }
     }
 }
