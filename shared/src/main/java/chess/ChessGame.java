@@ -45,6 +45,11 @@ public class ChessGame implements JsonSerializable {
         return winner;
     }
 
+    public void resign(TeamColor team) {
+        winner = team == TeamColor.WHITE ? TeamColor.BLACK : TeamColor.WHITE;
+        turn = null;
+    }
+
     /**
      * Makes a move in a chess game
      *

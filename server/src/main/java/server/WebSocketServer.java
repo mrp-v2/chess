@@ -1,5 +1,6 @@
 package server;
 
+import chess.ChessGame;
 import chess.InvalidMoveException;
 import model.*;
 import org.eclipse.jetty.websocket.api.Session;
@@ -19,10 +20,11 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
+import static chess.ChessGame.TeamColor.BLACK;
+import static chess.ChessGame.TeamColor.WHITE;
+
 @WebSocket
 public class WebSocketServer {
-
-    private static final String WRONG_MOVE_PLAYER = "can't make move for another player";
 
     private final Map<Integer, ActiveGame> activeGames;
     private final Map<Session, Runnable> connectionClosedHandles;
@@ -77,18 +79,14 @@ public class WebSocketServer {
 
     private void handleMakeMove(Session session, String username, GameData gameData, MoveCommand command) {
         try {
-            switch (gameData.game().getBoard().getPiece(command.move.getStartPosition()).getTeamColor()) {
-                case WHITE:
-                    if (!gameData.whiteUsername().equals(username)) {
-                        sendError(session, WRONG_MOVE_PLAYER);
-                        return;
-                    }
-                    break;
-                case BLACK:
-                    if (!gameData.blackUsername().equals(username)) {
-                        sendError(session, WRONG_MOVE_PLAYER);
-                        return;
-                    }
+            if (gameData.game().getTeamTurn() == null) {
+                sendError(session, "can't make move after game is over");
+                return;
+            }
+            ChessGame.TeamColor moveColor = gameData.game().getBoard().getPiece(command.move.getStartPosition()).getTeamColor();
+            if (moveColor != getPlayerColor(username, gameData)) {
+                sendError(session, "can't make move for another player");
+                return;
             }
             gameData.game().makeMove(command.move);
             ServiceResponse response = GameService.getInstance().update(gameData);
@@ -129,7 +127,20 @@ public class WebSocketServer {
     }
 
     private void handleResign(Session session, String username, GameData gameData, UserGameCommand command) {
-
+        if (gameData.game().getTeamTurn() == null) {
+            sendError(session, "game is already over");
+            return;
+        }
+        if (getPlayerColor(username, gameData) == null) {
+            sendError(session, "cannot resign without being a player");
+            return;
+        }
+        gameData.game().resign(getPlayerColor(username, gameData));
+        ServiceResponse response = GameService.getInstance().update(gameData);
+        if (response.failure()) {
+            sendError(session, response.toJson());
+        }
+        activeGames.get(gameData.gameID()).notifyUsers(new NotificationMessage(String.format("%s resigned", username)));
     }
 
     private String getUsername(Session session, UserGameCommand command) {
@@ -166,6 +177,16 @@ public class WebSocketServer {
         }
     }
 
+    private ChessGame.TeamColor getPlayerColor(String username, GameData game) {
+        if (username.equals(game.whiteUsername())) {
+            return WHITE;
+        } else if (username.equals(game.blackUsername())) {
+            return BLACK;
+        } else {
+            return null;
+        }
+    }
+
     @OnWebSocketClose
     public void onConnectionClosed(Session session, int statusCode, String reason) {
         Runnable run = connectionClosedHandles.get(session);
@@ -176,7 +197,7 @@ public class WebSocketServer {
     }
 
     @OnWebSocketError
-    public void onError(Session session, Throwable error) throws Throwable {
+    public void onError(Throwable error) throws Throwable {
         throw error;
     }
 

@@ -13,13 +13,6 @@ public class SQLGameAccess extends SQLAccess implements GameAccess {
 
     private static SQLGameAccess instance;
 
-    public static SQLGameAccess getInstance() {
-        if (instance == null) {
-            instance = new SQLGameAccess();
-        }
-        return instance;
-    }
-
     protected SQLGameAccess() {
         super("""
               CREATE TABLE IF NOT EXISTS game (
@@ -32,6 +25,13 @@ public class SQLGameAccess extends SQLAccess implements GameAccess {
               """);
     }
 
+    public static SQLGameAccess getInstance() {
+        if (instance == null) {
+            instance = new SQLGameAccess();
+        }
+        return instance;
+    }
+
     @Override
     public Collection<GameData> getGames() throws DataAccessException {
         Collection<GameData> data = new ArrayList<>();
@@ -42,6 +42,10 @@ public class SQLGameAccess extends SQLAccess implements GameAccess {
             return data;
         });
         return data;
+    }
+
+    private GameData resultToData(ResultSet result) throws SQLException {
+        return new GameData(result.getInt("id"), result.getString("usernameWhite"), result.getString("usernameBlack"), result.getString("name"), JsonSerializable.GSON.fromJson(result.getString("game"), ChessGame.class));
     }
 
     @Override
@@ -59,10 +63,6 @@ public class SQLGameAccess extends SQLAccess implements GameAccess {
         return query("SELECT * FROM game WHERE id=?", statement -> {
             statement.setInt(1, gameID);
         }, this::resultToData);
-    }
-
-    private GameData resultToData(ResultSet result) throws SQLException {
-        return new GameData(result.getInt("id"), result.getString("usernameWhite"), result.getString("usernameBlack"), result.getString("name"), JsonSerializable.GSON.fromJson(result.getString("game"), ChessGame.class));
     }
 
     @Override

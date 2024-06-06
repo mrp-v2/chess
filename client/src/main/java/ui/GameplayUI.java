@@ -20,9 +20,9 @@ public class GameplayUI extends PostLoginUI {
                                        moves <position>
                                        help""";
 
-    private final WebSocketFacade socketFacade;
-    private final ChessGame.TeamColor playerColor;
-    private GameData game;
+    protected final WebSocketFacade socketFacade;
+    protected final ChessGame.TeamColor playerColor;
+    protected GameData game;
 
     public GameplayUI(Scanner scanner, GameData game, ChessGame.TeamColor playerColor, AuthResponse auth, ServerFacade serverFacade) {
         super(scanner, "exit", auth, serverFacade);
@@ -49,7 +49,7 @@ public class GameplayUI extends PostLoginUI {
                 handleMove(args[1], args[2]);
                 break;
             case "resign":
-                // ask for confirmation before resigning, doesn't actually leave the game after resigning
+                handleResign();
                 break;
             case "moves":
                 // show the legal moves for a piece
@@ -92,8 +92,16 @@ public class GameplayUI extends PostLoginUI {
         socketFacade.move(auth.authToken(), game.gameID(), new ChessMove(fromPos, toPos));
     }
 
+    private void handleResign() {
+        ResignUI ui = new ResignUI(scanner, serverFacade);
+    }
+
     private void printBoardInterrupt() {
         PrintBoardHelper.printBoard(game.game().getBoard(), playerColor);
+    }
+
+    protected void doResign() {
+        socketFacade.resign(auth.authToken(), game.gameID());
     }
 
     public void updateBoard(GameData game) {
@@ -103,5 +111,24 @@ public class GameplayUI extends PostLoginUI {
 
     public void notification(String message) {
         printInterrupt(message);
+    }
+
+    private class ResignUI extends UserInputHandler {
+        protected ResignUI(Scanner scanner, ServerFacade serverFacade) {
+            super(scanner, "", serverFacade);
+        }
+
+        @Override
+        protected void printHelp() {
+            System.out.println("are you sure you want to resign? (y): ");
+        }
+
+        @Override
+        protected boolean handleArgs(String[] args) {
+            if (args.length == 1 && args[0].equals("y")) {
+                doResign();
+            }
+            return false;
+        }
     }
 }

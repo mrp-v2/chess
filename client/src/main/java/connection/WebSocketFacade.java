@@ -65,4 +65,8 @@ public class WebSocketFacade implements MessageHandler.Whole<String> {
     public void move(String auth, int gameID, ChessMove move) {
         sendData(new MoveCommand(auth, gameID, move));
     }
+
+    public void resign(String authToken, int gameID) {
+        sendData(UserGameCommand.resign(authToken, gameID));
+    }
 }

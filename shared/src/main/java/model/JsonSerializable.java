@@ -33,7 +33,7 @@ public interface JsonSerializable {
             };
         }
         return null;
-    }).create();
+    }).serializeNulls().create();
 
     default String toJson() {
         return GSON.toJson(this);
