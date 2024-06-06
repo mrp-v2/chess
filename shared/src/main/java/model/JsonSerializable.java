@@ -6,6 +6,7 @@ import com.google.gson.JsonDeserializer;
 import websocket.commands.MoveCommand;
 import websocket.commands.UserCommand;
 import websocket.commands.UserGameCommand;
+import websocket.messages.ErrorMessage;
 import websocket.messages.GameMessage;
 import websocket.messages.NotificationMessage;
 import websocket.messages.ServerMessage;
@@ -29,7 +30,8 @@ public interface JsonSerializable {
             String messageType = element.getAsJsonObject().get("serverMessageType").getAsString();
             return switch (ServerMessage.ServerMessageType.valueOf(messageType)) {
                 case LOAD_GAME -> context.deserialize(element, GameMessage.class);
-                case NOTIFICATION, ERROR -> context.deserialize(element, NotificationMessage.class);
+                case NOTIFICATION -> context.deserialize(element, NotificationMessage.class);
+                case ERROR -> context.deserialize(element, ErrorMessage.class);
             };
         }
         return null;

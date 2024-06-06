@@ -44,7 +44,7 @@ public class ActiveGame {
     }
 
     private void notifyUsersOfLostConnection(String username) {
-        notifyUsers(new NotificationMessage(String.format("%s lost their connection", username)));
+        notifyOtherUsers(username, new NotificationMessage(String.format("%s lost their connection", username)));
     }
 
     public void notifyUsers(JsonSerializable message) {

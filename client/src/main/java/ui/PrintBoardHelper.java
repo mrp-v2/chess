@@ -30,14 +30,7 @@ public class PrintBoardHelper {
     }
 
     private static void printColumnLabel(int col) {
-        switch (col) {
-            case 2:
-            case 4:
-            case 5:
-            case 7:
-                System.out.print(" ");
-        }
-        System.out.print(" " + col + " ");
+        System.out.print(" " + col + EscapeSequences.SHORT_EMPTY);
     }
 
     private static void printPosition(ChessBoard board, ChessPosition position, ChessPosition origin, Collection<ChessPosition> destinations) {

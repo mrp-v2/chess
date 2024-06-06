@@ -142,7 +142,8 @@ public class PostLoginUI extends UserInputHandler {
         if (gameIndex < 0) {
             return;
         }
-        ServerResponse<?> response;
+        GameplayUI gameplayUI = new GameplayUI(scanner, games[gameIndex], null, auth, serverFacade);
+        gameplayUI.run();
     }
 
     @Override

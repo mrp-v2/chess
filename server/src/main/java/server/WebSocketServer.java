@@ -5,7 +5,6 @@ import chess.InvalidMoveException;
 import model.*;
 import org.eclipse.jetty.websocket.api.Session;
 import org.eclipse.jetty.websocket.api.annotations.OnWebSocketClose;
-import org.eclipse.jetty.websocket.api.annotations.OnWebSocketError;
 import org.eclipse.jetty.websocket.api.annotations.OnWebSocketMessage;
 import org.eclipse.jetty.websocket.api.annotations.WebSocket;
 import service.AuthService;
@@ -67,9 +66,9 @@ public class WebSocketServer {
         ActiveGame activeGame = activeGames.computeIfAbsent(gameData.gameID(), key -> {
             return new ActiveGame();
         });
-        if (gameData.whiteUsername().equals(username)) {
+        if (username.equals(gameData.whiteUsername())) {
             connectionClosedHandles.put(session, activeGame.addWhite(session, username));
-        } else if (gameData.blackUsername().equals(username)) {
+        } else if (username.equals(gameData.blackUsername())) {
             connectionClosedHandles.put(session, activeGame.addBlack(session, username));
         } else {
             connectionClosedHandles.put(session, activeGame.addObserver(session, username));
@@ -109,9 +108,9 @@ public class WebSocketServer {
 
     private void handleLeave(Session session, String username, GameData gameData, UserGameCommand command) {
         ActiveGame activeGame = activeGames.get(gameData.gameID());
-        if (gameData.whiteUsername().equals(username)) {
+        if (username.equals(gameData.whiteUsername())) {
             activeGame.removeWhite();
-        } else if (gameData.blackUsername().equals(username)) {
+        } else if (username.equals(gameData.blackUsername())) {
             activeGame.removeBlack();
         } else {
             activeGame.removeObserver(username);
@@ -194,11 +193,6 @@ public class WebSocketServer {
             run.run();
             connectionClosedHandles.remove(session);
         }
-    }
-
-    @OnWebSocketError
-    public void onError(Throwable error) throws Throwable {
-        throw error;
     }
 
     @FunctionalInterface

@@ -22,6 +22,12 @@ public class GameplayUI extends PostLoginUI {
                                        moves <position>
                                        help""";
 
+    private static final String OBSERVER_HELP = """
+                                                redraw
+                                                leave
+                                                moves <position>
+                                                help""";
+
     protected final WebSocketFacade socketFacade;
     protected final ChessGame.TeamColor playerColor;
     protected GameData game;
@@ -43,6 +49,10 @@ public class GameplayUI extends PostLoginUI {
                 socketFacade.leave(auth.authToken(), game.gameID());
                 return false;
             case "move":
+                if (playerColor == null) {
+                    printHelp();
+                    break;
+                }
                 if (args.length == 3) {
                     handleMove(args[1], args[2], null);
                     break;
@@ -53,6 +63,10 @@ public class GameplayUI extends PostLoginUI {
                 printHelp();
                 break;
             case "resign":
+                if (playerColor == null) {
+                    printHelp();
+                    break;
+                }
                 handleResign();
                 break;
             case "moves":
@@ -65,11 +79,27 @@ public class GameplayUI extends PostLoginUI {
         return true;
     }
 
-    public void printBoard() {
-        printInterrupt(this::printBoardInterrupt);
+    private void printBoard() {
+        PrintBoardHelper.printBoard(game.game().getBoard(), playerColor);
+    }
+
+    @Override
+    protected void printHelp() {
+        if (playerColor == null) {
+            System.out.println(OBSERVER_HELP);
+        } else {
+            System.out.println(HELP);
+        }
     }
 
     private void handleMove(String from, String to, String promotionPiece) {
+        if (game.game().getTeamTurn() == null) {
+            System.out.println("game is over");
+        }
+        if (playerColor != game.game().getTeamTurn()) {
+            System.out.println("not your turn");
+            return;
+        }
         if (from.length() != 2) {
             System.out.printf("invalid position '%s', should be two characters\n", from);
             return;
@@ -100,13 +130,9 @@ public class GameplayUI extends PostLoginUI {
         socketFacade.move(auth.authToken(), game.gameID(), new ChessMove(fromPos, toPos, promotion));
     }
 
-    @Override
-    protected void printHelp() {
-        System.out.println(HELP);
-    }
-
     private void handleResign() {
         ResignUI ui = new ResignUI(scanner, serverFacade);
+        ui.run();
     }
 
     private void handleShowMoves(String position) {
@@ -127,17 +153,17 @@ public class GameplayUI extends PostLoginUI {
         PrintBoardHelper.printBoard(game.game().getBoard(), playerColor, moves);
     }
 
-    private void printBoardInterrupt() {
-        PrintBoardHelper.printBoard(game.game().getBoard(), playerColor);
-    }
-
     protected void doResign() {
         socketFacade.resign(auth.authToken(), game.gameID());
     }
 
     public void updateBoard(GameData game) {
         this.game = game;
-        printBoard();
+        printBoardInterrupt();
+    }
+
+    public void printBoardInterrupt() {
+        printInterrupt(this::printBoard);
     }
 
     public void notification(String message) {

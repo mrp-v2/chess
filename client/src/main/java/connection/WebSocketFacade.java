@@ -5,6 +5,7 @@ import model.JsonSerializable;
 import ui.GameplayUI;
 import websocket.commands.MoveCommand;
 import websocket.commands.UserGameCommand;
+import websocket.messages.ErrorMessage;
 import websocket.messages.GameMessage;
 import websocket.messages.NotificationMessage;
 import websocket.messages.ServerMessage;
@@ -51,11 +52,18 @@ public class WebSocketFacade implements MessageHandler.Whole<String> {
                 ui.updateBoard(((GameMessage) serverMessage).game);
             case NOTIFICATION:
                 ui.notification(((NotificationMessage) serverMessage).message);
+            case ERROR:
+                ui.notification(((ErrorMessage) serverMessage).errorMessage);
         }
     }
 
     public void leave(String auth, int gameID) {
         sendData(UserGameCommand.leave(auth, gameID));
+        try {
+            session.close();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     private void sendData(JsonSerializable data) {
