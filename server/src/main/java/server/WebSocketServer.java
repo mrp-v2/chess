@@ -22,6 +22,8 @@ import java.util.Map;
 @WebSocket
 public class WebSocketServer {
 
+    private static final String WRONG_MOVE_PLAYER = "can't make move for another player";
+
     private final Map<Integer, ActiveGame> activeGames;
     private final Map<Session, Runnable> connectionClosedHandles;
 
@@ -75,16 +77,32 @@ public class WebSocketServer {
 
     private void handleMakeMove(Session session, String username, GameData gameData, MoveCommand command) {
         try {
+            switch (gameData.game().getBoard().getPiece(command.move.getStartPosition()).getTeamColor()) {
+                case WHITE:
+                    if (!gameData.whiteUsername().equals(username)) {
+                        sendError(session, WRONG_MOVE_PLAYER);
+                        return;
+                    }
+                    break;
+                case BLACK:
+                    if (!gameData.blackUsername().equals(username)) {
+                        sendError(session, WRONG_MOVE_PLAYER);
+                        return;
+                    }
+            }
             gameData.game().makeMove(command.move);
             ServiceResponse response = GameService.getInstance().update(gameData);
             if (response.failure()) {
                 sendError(session, response.toJson());
+                return;
             }
             ActiveGame activeGame = activeGames.get(gameData.gameID());
             activeGame.notifyUsers(new GameMessage(gameData));
             activeGame.notifyOtherUsers(username, new NotificationMessage(String.format("%s moved %s to %s", username, command.move.getStartPosition(), command.move.getEndPosition())));
-            if (gameData.game().isInCheckmate(gameData.game().getTeamTurn())) {
-
+            if (gameData.game().getWinner() != null) {
+                activeGame.notifyUsers(new NotificationMessage(String.format("%s wins by checkmate", gameData.game().getWinner())));
+            } else if (gameData.game().isInCheck(gameData.game().getTeamTurn())) {
+                activeGame.notifyUsers(new NotificationMessage(String.format("%s is in check", gameData.game().getTeamTurn())));
             }
         } catch (InvalidMoveException e) {
             sendError(session, "invalid move");
