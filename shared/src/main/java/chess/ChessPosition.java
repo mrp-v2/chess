@@ -17,6 +17,14 @@ public class ChessPosition {
         this.col = col;
     }
 
+    public ChessPosition(String from) {
+        if (from.length() != 2) {
+            throw new IllegalArgumentException("from string should be exactly two characters");
+        }
+        row = from.charAt(0) - 'a' + 1;
+        col = from.charAt(1) - '1' + 1;
+    }
+
     /**
      * @return which row this position is in
      * 1 codes for the bottom row

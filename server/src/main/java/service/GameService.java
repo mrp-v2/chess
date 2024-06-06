@@ -84,6 +84,24 @@ public class GameService {
         return ServiceResponse.SUCCESS;
     }
 
+    public ServiceResponse update(GameData game) {
+        GameData original;
+        try {
+            original = gameAccess.getGameData(game.gameID());
+        } catch (DataAccessException e) {
+            return ErrorModel.DATABASE_ERROR;
+        }
+        if (original == null) {
+            return ErrorModel.BAD_REQUEST;
+        }
+        try {
+            gameAccess.updateGame(game.gameID(), game);
+        } catch (DataAccessException e) {
+            return ErrorModel.DATABASE_ERROR;
+        }
+        return Wrapper.success(game);
+    }
+
     public ServiceResponse join(JoinGameRequest data, String username) {
         // verify the game exists and the request is valid
         GameData result;

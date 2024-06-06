@@ -1,5 +1,6 @@
 package server;
 
+import chess.InvalidMoveException;
 import model.*;
 import org.eclipse.jetty.websocket.api.Session;
 import org.eclipse.jetty.websocket.api.annotations.OnWebSocketClose;
@@ -12,6 +13,7 @@ import websocket.commands.MoveCommand;
 import websocket.commands.UserGameCommand;
 import websocket.messages.ErrorMessage;
 import websocket.messages.GameMessage;
+import websocket.messages.NotificationMessage;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -72,7 +74,21 @@ public class WebSocketServer {
     }
 
     private void handleMakeMove(Session session, String username, GameData gameData, MoveCommand command) {
+        try {
+            gameData.game().makeMove(command.move);
+            ServiceResponse response = GameService.getInstance().update(gameData);
+            if (response.failure()) {
+                sendError(session, response.toJson());
+            }
+            ActiveGame activeGame = activeGames.get(gameData.gameID());
+            activeGame.notifyUsers(new GameMessage(gameData));
+            activeGame.notifyOtherUsers(username, new NotificationMessage(String.format("%s moved %s to %s", username, command.move.getStartPosition(), command.move.getEndPosition())));
+            if (gameData.game().isInCheckmate(gameData.game().getTeamTurn())) {
 
+            }
+        } catch (InvalidMoveException e) {
+            sendError(session, "invalid move");
+        }
     }
 
     private void handleLeave(Session session, String username, GameData gameData, UserGameCommand command) {
@@ -83,6 +99,9 @@ public class WebSocketServer {
             activeGame.removeBlack();
         } else {
             activeGame.removeObserver(username);
+        }
+        if (!activeGame.isActive()) {
+            activeGames.remove(gameData.gameID());
         }
         connectionClosedHandles.remove(session);
         ServiceResponse response = GameService.getInstance().leave(gameData, username);

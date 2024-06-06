@@ -29,7 +29,7 @@ public class ActiveGame {
         };
     }
 
-    private void notifyOtherUsers(String username, NotificationMessage data) {
+    public void notifyOtherUsers(String username, JsonSerializable data) {
         if (white != null && !white.username().equals(username)) {
             WebSocketServer.sendData(white.session(), data);
         }
@@ -47,7 +47,7 @@ public class ActiveGame {
         notifyUsers(new NotificationMessage(String.format("%s lost their connection", username)));
     }
 
-    private void notifyUsers(NotificationMessage message) {
+    public void notifyUsers(JsonSerializable message) {
         if (white != null) {
             WebSocketServer.sendData(white.session(), message);
         }

@@ -52,6 +52,9 @@ public class ChessGame implements JsonSerializable {
      * @throws InvalidMoveException if move is invalid
      */
     public void makeMove(ChessMove move) throws InvalidMoveException {
+        if (turn == null) {
+            throw new InvalidMoveException("Cannot make a move after the game is over");
+        }
         if (board.getPiece(move.getStartPosition()) == null) {
             throw new InvalidMoveException("No piece at starting position");
         }
@@ -69,6 +72,12 @@ public class ChessGame implements JsonSerializable {
             board.addPiece(move.getEndPosition(), piece);
         }
         turn = turn == TeamColor.WHITE ? TeamColor.BLACK : TeamColor.WHITE;
+        if (isInCheckmate(turn)) {
+            winner = turn == TeamColor.WHITE ? TeamColor.BLACK : TeamColor.WHITE;
+            turn = null;
+        } else if (isInStalemate(turn)) {
+            turn = null;
+        }
     }
 
     /**
@@ -99,6 +108,19 @@ public class ChessGame implements JsonSerializable {
         }
     }
 
+    /**
+     * Determines if the given team is in checkmate
+     *
+     * @param teamColor which team to check for checkmate
+     * @return True if the specified team is in checkmate
+     */
+    public boolean isInCheckmate(TeamColor teamColor) {
+        if (!isInCheck(teamColor)) {
+            return false;
+        }
+        return hasNoValidMoves(teamColor);
+    }
+
     private ChessGame makeClone() {
         ChessGame clone = new ChessGame();
         clone.turn = turn;
@@ -125,19 +147,6 @@ public class ChessGame implements JsonSerializable {
             }
         }
         return false;
-    }
-
-    /**
-     * Determines if the given team is in checkmate
-     *
-     * @param teamColor which team to check for checkmate
-     * @return True if the specified team is in checkmate
-     */
-    public boolean isInCheckmate(TeamColor teamColor) {
-        if (!isInCheck(teamColor)) {
-            return false;
-        }
-        return hasNoValidMoves(teamColor);
     }
 
     private boolean hasNoValidMoves(TeamColor teamColor) {

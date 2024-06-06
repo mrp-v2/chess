@@ -1,7 +1,9 @@
 package connection;
 
+import chess.ChessMove;
 import model.JsonSerializable;
 import ui.GameplayUI;
+import websocket.commands.MoveCommand;
 import websocket.commands.UserGameCommand;
 import websocket.messages.GameMessage;
 import websocket.messages.NotificationMessage;
@@ -58,5 +60,9 @@ public class WebSocketFacade implements MessageHandler.Whole<String> {
 
     private void sendData(JsonSerializable data) {
         sendData(session, data);
+    }
+
+    public void move(String auth, int gameID, ChessMove move) {
+        sendData(new MoveCommand(auth, gameID, move));
     }
 }
