@@ -5,11 +5,11 @@ import org.eclipse.jetty.websocket.api.Session;
 import server.WebSocketServer;
 import websocket.messages.NotificationMessage;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 public class ActiveGame {
     private final List<SessionInfo> observers;
+    private final Map<String, SessionInfo> users;
     private SessionInfo white;
     private SessionInfo black;
 
@@ -17,6 +17,7 @@ public class ActiveGame {
         white = null;
         black = null;
         observers = new ArrayList<>();
+        users = new HashMap<>();
     }
 
     public Runnable addWhite(Session white, String username) {
@@ -108,5 +109,10 @@ public class ActiveGame {
     public void removeBlack() {
         notifyUsersOfLeaving(black.username());
         black = null;
+    }
+
+    public Runnable addUser(Session session, String username, EnumSet<ChessGame.TeamColor> playerColor) {
+        users.put(username, new SessionInfo(session, username, playerColor));
+        NotificationMessage message = NotificationMessage.joinNotification(username, )
     }
 }

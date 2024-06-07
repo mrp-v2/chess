@@ -12,7 +12,6 @@ public record ErrorModel(ErrorResponse data, int statusCode) implements ServiceR
     public static final ErrorModel UNAUTHORIZED = new ErrorModel("Error: unauthorized", 401);
     public static final ErrorModel ALREADY_TAKEN = new ErrorModel("Error: already taken", 403);
     public static final ErrorModel DATABASE_ERROR = new ErrorModel("Error: error while interacting with database", 500);
-    public static final ErrorModel ALREADY_JOINED = new ErrorModel("Error: already joined this game", 403);
 
     private ErrorModel(String message, int statusCode) {
         this(new ErrorResponse(message), statusCode);

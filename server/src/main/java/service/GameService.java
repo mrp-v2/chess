@@ -113,9 +113,6 @@ public class GameService {
         if (result == null || data.playerColor() == null) {
             return ErrorModel.BAD_REQUEST;
         }
-        if (username.equals(result.blackUsername()) || username.equals(result.whiteUsername())) {
-            return ErrorModel.ALREADY_JOINED;
-        }
         GameData modified = null;
         // add player to correct color
         switch (data.playerColor()) {

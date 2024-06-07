@@ -66,13 +66,7 @@ public class WebSocketServer {
         ActiveGame activeGame = activeGames.computeIfAbsent(gameData.gameID(), key -> {
             return new ActiveGame();
         });
-        if (username.equals(gameData.whiteUsername())) {
-            connectionClosedHandles.put(session, activeGame.addWhite(session, username));
-        } else if (username.equals(gameData.blackUsername())) {
-            connectionClosedHandles.put(session, activeGame.addBlack(session, username));
-        } else {
-            connectionClosedHandles.put(session, activeGame.addObserver(session, username));
-        }
+        connectionClosedHandles.put(session, activeGame.addUser(username, gameData.getPlayerColor(username)));
         sendData(session, new GameMessage(gameData));
     }
 
