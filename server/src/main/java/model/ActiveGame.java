@@ -28,12 +28,14 @@ public class ActiveGame {
         switch (playerColor.size()) {
             case 2:
                 message = "%s joined as WHITE & BLACK";
+                break;
             case 1:
                 if (playerColor.contains(ChessGame.TeamColor.WHITE)) {
                     message = "%s joined as WHITE";
                 } else {
                     message = "%s joined as BLACK";
                 }
+                break;
             default:
                 message = "%s started observing the game";
         }
