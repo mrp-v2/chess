@@ -7,7 +7,7 @@ import java.util.Collection;
 import java.util.Collections;
 
 public class PrintBoardHelper {
-    private static final String[] VERTICAL_LABELS = new String[]{"a", "b", "c", "d", "e", "f", "g", "h"};
+    private static final String[] COLUMN_LABELS = new String[]{"a", "b", "c", "d", "e", "f", "g", "h"};
 
     public static void printBoard(ChessBoard board, ChessGame.TeamColor perspective) {
         printBoard(board, perspective, Collections.emptyList());
@@ -15,7 +15,7 @@ public class PrintBoardHelper {
 
     public static void printWhite(ChessBoard board, ChessPosition origin, Collection<ChessPosition> destinations) {
         for (int i = 7; i >= 0; i--) {
-            System.out.print(EscapeSequences.SET_BG_COLOR_YELLOW + " " + EscapeSequences.SET_TEXT_COLOR_BLACK + VERTICAL_LABELS[i] + EscapeSequences.RESET_TEXT_COLOR + " ");
+            System.out.print(EscapeSequences.SET_BG_COLOR_YELLOW + " " + EscapeSequences.SET_TEXT_COLOR_BLACK + (i + 1) + EscapeSequences.RESET_TEXT_COLOR + " ");
             for (int col = 1; col <= 8; col++) {
                 ChessPosition current = new ChessPosition(i + 1, col);
                 printPosition(board, current, origin, destinations);
@@ -30,7 +30,7 @@ public class PrintBoardHelper {
     }
 
     private static void printColumnLabel(int col) {
-        System.out.print(" " + col + EscapeSequences.SHORT_EMPTY);
+        System.out.print(" " + COLUMN_LABELS[col - 1] + EscapeSequences.SHORT_EMPTY);
     }
 
     private static void printPosition(ChessBoard board, ChessPosition position, ChessPosition origin, Collection<ChessPosition> destinations) {
@@ -74,7 +74,7 @@ public class PrintBoardHelper {
 
     public static void printBlack(ChessBoard board, ChessPosition origin, Collection<ChessPosition> destinations) {
         for (int i = 0; i < 8; i++) {
-            System.out.print(EscapeSequences.SET_BG_COLOR_YELLOW + " " + EscapeSequences.SET_TEXT_COLOR_BLACK + VERTICAL_LABELS[i] + EscapeSequences.RESET_TEXT_COLOR + " ");
+            System.out.print(EscapeSequences.SET_BG_COLOR_YELLOW + " " + EscapeSequences.SET_TEXT_COLOR_BLACK + (i + 1) + EscapeSequences.RESET_TEXT_COLOR + " ");
             for (int col = 8; col > 0; col--) {
                 ChessPosition current = new ChessPosition(i + 1, col);
                 printPosition(board, current, origin, destinations);

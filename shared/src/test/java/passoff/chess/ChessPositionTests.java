@@ -25,7 +25,14 @@ public class ChessPositionTests {
     @DisplayName("From String")
     public void fromString() {
         Assertions.assertEquals(new ChessPosition(1, 1), new ChessPosition("a1"));
-        Assertions.assertEquals(new ChessPosition(3, 7), new ChessPosition("c7"));
+        Assertions.assertEquals(new ChessPosition(3, 7), new ChessPosition("g3"));
+    }
+
+    @Test
+    @DisplayName("To String")
+    public void toFancyString() {
+        Assertions.assertEquals("a1", new ChessPosition(1, 1).toString());
+        Assertions.assertEquals("c5", new ChessPosition(5, 3).toString());
     }
 
     @Test

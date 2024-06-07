@@ -21,8 +21,13 @@ public class ChessPosition {
         if (from.length() != 2) {
             throw new IllegalArgumentException("from string should be exactly two characters");
         }
-        row = from.charAt(0) - 'a' + 1;
-        col = from.charAt(1) - '1' + 1;
+        col = from.charAt(0) - 'a' + 1;
+        row = from.charAt(1) - '1' + 1;
+    }
+
+    @Override
+    public String toString() {
+        return new StringBuilder().append((char) ('a' - 1 + col)).append((char) ('1' - 1 + row)).toString();
     }
 
     /**
